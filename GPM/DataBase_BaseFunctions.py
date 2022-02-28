@@ -1,4 +1,4 @@
-import os, pandas as pd, numpy as np, gams, pickle, gams2numpy, gamstransfer
+import os, pandas as pd, numpy as np, gams, pickle, gams2numpy, gamstransfer, gmdcc
 from collections.abc import Iterable
 from six import string_types
 
@@ -38,7 +38,7 @@ def merge_symbols(s1,s2):
 		return s1.combine_first(s2)
 	elif isinstance(s1,pd.Index):
 		return s1.union(s2)
-	elif _type_pandas(s1) in ('scalar_variable','scalar_parameter'):
+	elif type_pandas_(s1) in ('scalar_variable','scalar_parameter'):
 		return s1
 
 # 2: Identify types between gams databases and GPM databases:
@@ -75,7 +75,7 @@ def type_gams_set(symbol):
 	elif symbol.name!='SameAs':
 		return 'mapping'
 
-def type_pandas_(symbol,name=None,type=None):
+def type_pandas_(symbol,name=None,type=None,**kwargs):
 	""" identify type from pandas-like input"""
 	if isinstance(symbol, pd.Series):
 		return type if type else 'variable'
@@ -100,6 +100,7 @@ def agg_type(type_i):
 		return type_i
 
 # 3: From gdx data to Python/Pandas representation
+# 3.1: Referencing gams._GamsSymbol
 def gpydict_from_gams_(symbol,db_gams,g2np):
 	if isinstance(symbol,gams.GamsSet):
 		return gpydict_from_gamsSet(symbol,db_gams,g2np)
@@ -115,16 +116,19 @@ def gpydict_from_gamsSet(symbol,db_gams,g2np):
 			'type': type_gams_set(symbol)}
 
 def gpydict_from_gamsVariable(symbol,db_gams,g2np):
-	return {'vals': df_from_variable(np_from_gams(symbol,db_gams,g2np), symbol.name, symbol.domains_as_strings,**{'attributes': ['level']})['level'],
+	return {'vals': adjust_scalar(symbol,df_from_variable(np_from_gams(symbol,db_gams,g2np), symbol.name, symbol.domains_as_strings,**{'attributes': ['level']})['level']),
 			'name': symbol.name,
 			'text': symbol.text,
 			'type': type_gams_variable(symbol)}
 
 def gpydict_from_gamsParameter(symbol,db_gams,g2np):
-	return {'vals': df_from_parameter(np_from_gams(symbol,db_gams,g2np), symbol.name,symbol.domains_as_strings)['value'],
+	return {'vals': adjust_scalar(symbol,df_from_parameter(np_from_gams(symbol,db_gams,g2np), symbol.name,symbol.domains_as_strings)['value']),
 			'name': symbol.name,
 			'text': symbol.text,
 			'type': type_gams_parameter(symbol)}
+
+def adjust_scalar(symbol,vals):
+	return vals if not symbol_is_scalar(symbol) else vals[0]
 
 def df_from_variable(np_data,symbol_name,domains_as_strings,attributes=['level','marginal','lower','upper','scale']):
 	return pd.DataFrame(np_data[:,[default_attributes_variables[k] for k in attributes]],
@@ -163,8 +167,9 @@ def np_from_gams(symbol,db_gams,g2np):
 def symbol_is_scalar(symbol):
 	return not symbol.domains_as_strings
 
+
 # 4: From Python to GAMS
-def _gamstransfer_from_py(symbol,container):
+def gamstransfer_from_py_(symbol,container):
 	""" symbol = gpy_symbol, container = gamstransfer.Container """
 	if symbol.type == 'set':
 		gamstransferSet_from_py(symbol.index, container, description=symbol.text)
