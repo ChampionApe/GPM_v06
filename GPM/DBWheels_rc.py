@@ -1,7 +1,7 @@
-import pandas as pd
+import pandas as pd, numpy as np
 from _Database import gpy
-
 rctree_admissable_types = (gpy,pd.Index, pd.Series, pd.DataFrame)
+rctree_scalar_types = (int,float,np.generic)
 def tryint(x):
     try:
         return int(x)
@@ -11,7 +11,7 @@ def tryint(x):
 def rc_AdjGpy(s, c = None, alias = {}, lag = {}, pm = False, **kwargs):
 	if c:
 		copy = s.copy()
-		copy.vals = rctree_pd(s=s,c=c,alias=alias,lag=lag,pm=pm)
+		copy.vals = rc_pd(s=s,c=c,alias=alias,lag=lag,pm=pm)
 		return copy
 	else:
 		return AdjGpy(s,alias=alias, lag = lag)
@@ -30,6 +30,8 @@ def rc_AdjPd(symbol, alias = {}, lag = {}):
 		return symbol.set_index(AdjAliasInd(AdjLagInd(symbol.index, lag=lag), alias=alias),verify_integrity=False)
 	elif isinstance(symbol,gpy):
 		return rc_AdjPd(symbol.vals, alias = alias, lag = lag)
+	elif isinstance(symbol, rctree_scalar_types):
+		return symbol
 	else:
 		raise TypeError(f"rc_AdjPd only uses instances {rctree_admissable_types} (and no scalars). Input was type {type(symbol)}")
 
@@ -46,20 +48,41 @@ def AdjAliasInd(index_,alias={}):
 	return index_.set_names([x if x not in alias.keys() else alias[x] for x in index_.names])
 
 # Subsetting methods:
-def rctree_pd(s=None,c=None,alias={},lag ={},pm = False, **kwargs):
-	adj = rc_AdjPd(s,alias=alias,lag=lag)
-	if not pm:
-		return getvalues(adj)[point(getindex(adj) ,c)]
+def rc_pd(s=None,c=None,alias={},lag ={}, pm = True, **kwargs):
+	if isinstance(s,rctree_scalar_types):
+		return s
+	elif isinstance(s, gpy) and (s.type in ('scalar_variable','scalar_parameter')):
+		return s.vals
 	else:
-		return getvalues(adj)[point_pm(getindex(adj), c)]
+		return rctree_pd(s=s, c = c, alias = alias, lag = lag, pm = pm, **kwargs)
 
-def point_pm(pdObj,vi):
+def rc_pdInd(s=None,c=None,alias={},lag={},pm=True,**kwargs):
+	if isinstance(s,rctree_scalar_types) or (isinstance(s,gpy) and (s.type in ('scalar_variable','scalar_parameter'))):
+		return None
+	else:
+		return rctree_pdInd(s=s,c=c,alias=alias,lag=lag,pm=pm,**kwargs)
+
+def rctree_pd(s=None,c=None,alias={},lag ={}, pm = True, **kwargs):
+	adj = rc_AdjPd(s,alias=alias,lag=lag)
+	if pm:
+		return getvalues(adj)[point_pm(getindex(adj), c, pm)]
+	else:
+		return getvalues(adj)[point(getindex(adj) ,c)]
+
+def rctree_pdInd(s=None,c=None,alias={},lag={},pm=True,**kwargs):
+	adj = rc_AdjPd(s,alias=alias,lag=lag)
+	if pm:
+		return getindex(adj)[point_pm(getindex(adj), c, pm)]
+	else:
+		return getindex(adj)[point(getindex(adj),c)]
+
+def point_pm(pdObj,vi,pm):
 	if isinstance(vi,rctree_admissable_types):
-		return bool_ss_pm(pdObj,getindex(vi))
+		return bool_ss_pm(pdObj,getindex(vi),pm)
 	elif isinstance(vi,dict):
-		return bool_ss_pm(pdObj,getindex(rctree_pd(**vi)))
+		return bool_ss_pm(pdObj,rctree_pdInd(**vi),pm)
 	elif isinstance(vi,tuple):
-		return rctree_tuple_pm(pdObj,vi)
+		return rctree_tuple_pm(pdObj,vi,pm)
 	elif vi is None:
 		return pdObj == pdObj
 
@@ -67,7 +90,7 @@ def point(pdObj, vi):
 	if isinstance(vi, rctree_admissable_types):
 		return bool_ss(pdObj,getindex(vi))
 	elif isinstance(vi,dict):
-		return bool_ss(pdObj,getindex(rctree_pd(**vi)))
+		return bool_ss(pdObj,rctree_pdInd(**vi))
 	elif isinstance(vi,tuple):
 		return rctree_tuple(pdObj,vi)
 	elif vi is None:
@@ -79,22 +102,22 @@ def rctree_tuple(pdObj,tup):
 	else:
 		return translate_k2pd([point(pdObj,vi) for vi in tup[1]],tup[0])
 
-def rctree_tuple_pm(pdObj,tup):
+def rctree_tuple_pm(pdObj,tup,pm):
 	if tup[0]=='not':
-		return translate_k2pd(point_pm(pdObj,tup[1],tup[0]))
+		return translate_k2pd(point_pm(pdObj,tup[1],pm),tup[0])
 	else:
-		return translate_k2pd([point_pm(pdObj,vi) for vi in tup[1]],tup[0])
+		return translate_k2pd([point_pm(pdObj,vi,pm) for vi in tup[1]],tup[0])
 
 def bool_ss(pdObjIndex,ssIndex):
 	o,d = overlap_drop(pdObjIndex,ssIndex)
-	return pdObjIndex.isin([]) if not o else pdObjIndex.droplevel(d).isin(reorder(ssIndex,o))
+	return pdObjIndex.isin([]) if len(o)<len(ssIndex.names) else pdObjIndex.droplevel(d).isin(reorder(ssIndex,o))
 
-def bool_ss_pm(pdObjIndex,ssIndex):
+def bool_ss_pm(pdObjIndex,ssIndex,pm):
 	o = overlap_pm(pdObjIndex, ssIndex)
 	if o:
 		return pdObjIndex.droplevel([x for x in pdObjIndex.names if x not in o]).isin(reorder(ssIndex.droplevel([x for x in ssIndex.names if x not in o]),o))
 	else:
-		return pdObjIndex.isin([])
+		return pdObjIndex==pdObjIndex if pm is True else pdObjIndex.isin([])
 
 def overlap_drop(pdObjIndex,index_):
 	return [x for x in pdObjIndex.names if x in index_.names],[x for x in pdObjIndex.names if x not in index_.names]
@@ -103,7 +126,7 @@ def overlap_pm(pdObjIndex,index_):
 	return [x for x in pdObjIndex.names if x in index_.names]
 
 def reorder(index_,o):
-	return index_ if len(o)==1 else index_.reorder_levels(o)
+	return index_ if len(index_.names)==1 else index_.reorder_levels(o)
 
 def getindex(pdObj):
 	if isinstance(pdObj,(gpy,pd.Series,pd.DataFrame)):

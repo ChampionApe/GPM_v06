@@ -1,0 +1,103 @@
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 03/14/22 14:54:29 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+ 581   
+ 582   
+ 583  # ----------------------------------------------------------------------------------------------------$FIX G_V01_NT_exo_always, G_V01_NT_exo_base, G_V01_T_exo_always, G_V01_T_exo_base;
+ 584  # ----------------------------------------------------------------------------------------------------
+ 592   
+ 593  # ----------------------------------------------------------------------------------------------------$UNFIX G_V01_NT_endo_always, G_V01_NT_endo_base, G_V01_T_endo_always, G_V01_T_endo_base, G_V01_ACC_endo_base;
+ 594  # ----------------------------------------------------------------------------------------------------
+ 605   
+ 606  # ----------------------------------------------------------------------------------------------------
+ 607  #  Define V01_B model
+ 608  # ----------------------------------------------------------------------------------------------------
+ 609  Model V01_B /
+ 610  E_V01_NT_ZP_out, E_V01_NT_ZP_nout, E_V01_NT_qD_out, E_V01_NT_qD_nout, E_V01_T_qD, E_V01_T_pES, E_V01_T_pT, E_V01_T_sum, E_V01_ACC_inp
+ 611  /;
+ 612   
+ 613  scalars V01_B_modelstat, V01_B_solvestat;
+ 614  solve V01_B using CNS;
+ 615  V01_B_modelstat = V01_B.modelstat; V01_B_solvestat = V01_B.solvestat;
+
+
+COMPILATION TIME     =        0.015 SECONDS      3 MB  38.1.0 a1a3b545 WEX-WEI
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 03/14/22 14:54:29 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE V01_B Using CNS From line 614
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           9     SINGLE EQUATIONS           31
+BLOCKS OF VARIABLES           8     SINGLE VARIABLES           82
+NON ZERO ELEMENTS           259     NON LINEAR N-Z            229
+CODE LENGTH                 396     CONSTANT POOL              16
+SINGLE =E|X= EQUS            31     SINGLE UNFIXED VARS        31
+
+
+GENERATION TIME      =        0.000 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 03/14/22 14:54:29 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE V01_B Using CNS From line 614
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   V01_B               
+     TYPE    CNS                 
+     SOLVER  CONOPT4             FROM LINE  614
+
+**** SOLVER STATUS     1 Normal Completion
+**** MODEL STATUS      16 Solved
+
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
+ ITERATION COUNT, LIMIT         4    2147483647
+ EVALUATION ERRORS              0             0
+ 
+ 
+    C O N O P T   version 4.25
+    Copyright (C) ARKI Consulting and Development A/S
+                  Bagsvaerdvej 246 A
+                  DK-2880 Bagsvaerd, Denmark
+ 
+ 
+    The user model has 31 constraints and 82 variables
+    with 259 Jacobian elements, 229 of which are nonlinear.
+ 
+    The pre-triangular part of the model has 6 constraints and 57 variables.
+ 
+    Preprocessed model has 25 constraints and 25 variables
+    with 106 Jacobian elements, 82 of which are nonlinear.
+ 
+ ** Feasible solution to a square system.
+ 
+ 
+ CONOPT time Total                            0.001 seconds
+   of which: Function evaluations             0.000 =  0.0%
+             1st Derivative evaluations       0.000 =  0.0%
+ 
+
+
+**** REPORT SUMMARY :        0 INFEASIBLE
+                             0  DEPENDENT
+                             0     ERRORS
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 03/14/22 14:54:29 Page 7
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+E x e c u t i o n
+
+
+EXECUTION TIME       =        0.125 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
+
+
+USER: Large MUD - 20 User License                    G211207|0002CA-WIN
+      DREAM, Danish Rational Economic Agents Model                DC620
+
+
+**** FILE SUMMARY
+
+Restart    C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\_gams_py_gcp0.g00
+Input      C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\_gams_py_gjo1.gms
+Output     C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\_gams_py_gjo1.lst

@@ -1,0 +1,105 @@
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 03/14/22 14:54:29 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+   1  sets
+   2          alias_set
+   3          alias_map2
+   4          s
+   5          n
+   6  ;
+   7   
+   8  alias(n,nn,nnn);
+   9   
+  10  sets
+  11          alias_[alias_set,alias_map2]
+  12          V01_NT_map[s,n,nn]
+  13          V01_NT_inp[s,n]
+  14          V01_NT_out[s,n]
+  15          V01_NT_int[s,n]
+  16          V01_NT_bra_out[s,n]
+  17          V01_NT_bra_nout[s,n]
+  18          V01_inp[s,n]
+  19          V01_NT_x[s,n]
+  20          V01_x2inp[s,n,nn]
+  21          V01_dur[s,n]
+  22          V01_ES[s,n]
+  23          V01_T[s,n]
+  24          V01_inp2T[s,n,nn]
+  25          V01_T2ES[s,n,nn]
+  26          V01_T2ESNorm[s,n,nn]
+  27          V01_map[s,n,nn]
+  28  ;
+  29   
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v06\gams\AbatementExample\V01_DB.gdx
+--- LOAD  alias_set = 1:alias_set
+--- LOAD  alias_map2 = 2:alias_map2
+--- LOAD  s = 3:s
+--- LOAD  n = 4:n
+--- LOAD  alias_ = 6:alias_
+--- LOAD  V01_NT_map = 12:V01_NT_map
+--- LOAD  V01_NT_inp = 13:V01_NT_inp
+--- LOAD  V01_NT_out = 14:V01_NT_out
+--- LOAD  V01_NT_int = 15:V01_NT_int
+--- LOAD  V01_NT_bra_out = 16:V01_NT_bra_out
+--- LOAD  V01_NT_bra_nout = 17:V01_NT_bra_nout
+--- LOAD  V01_inp = 18:V01_inp
+--- LOAD  V01_NT_x = 19:V01_NT_x
+--- LOAD  V01_x2inp = 20:V01_x2inp
+--- LOAD  V01_dur = 21:V01_dur
+--- LOAD  V01_ES = 23:V01_ES
+--- LOAD  V01_T = 24:V01_T
+--- LOAD  V01_inp2T = 25:V01_inp2T
+--- LOAD  V01_T2ES = 26:V01_T2ES
+--- LOAD  V01_T2ESNorm = 27:V01_T2ESNorm
+--- LOAD  V01_map = 28:V01_map
+  55  ;
+  56  variables
+  57          pD[s,n]
+  58          qS[s,n]
+  59          sigma[s,n]
+  60          mu[s,n,nn]
+  61          qD[s,n]
+  62          theta[s,n]
+  63          lambda[s,n]
+  64          pS[s,n]
+  65  ;
+  66   
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v06\gams\AbatementExample\V01_DB.gdx
+--- LOAD  pD = 7:pD
+--- LOAD  qS = 8:qS
+--- LOAD  sigma = 9:sigma
+--- LOAD  mu = 10:mu
+--- LOAD  qD = 11:qD
+--- LOAD  theta = 22:theta
+--- LOAD  lambda = 29:lambda
+--- LOAD  pS = 30:pS
+  79   
+  80  ;
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 03/14/22 14:54:29 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Include File Summary
+
+
+   SEQ   GLOBAL TYPE      PARENT   LOCAL  FILENAME
+
+     1        1 INPUT          0       0  C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\_gams_py_gjo0.gms
+     2       30 GDXIN          1      30  C:\Users\sxj477\Documents\GitHub\GPM_v06\gams\AbatementExample\V01_DB.gdx
+     3       67 GDXIN          1      67  C:\Users\sxj477\Documents\GitHub\GPM_v06\gams\AbatementExample\V01_DB.gdx
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  38.1.0 a1a3b545 WEX-WEI
+
+
+EXECUTION TIME       =        0.000 SECONDS      3 MB  38.1.0 a1a3b545 WEX-WEI
+
+
+USER: Large MUD - 20 User License                    G211207|0002CA-WIN
+      DREAM, Danish Rational Economic Agents Model                DC620
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\_gams_py_gjo0.gms
+Output     C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\_gams_py_gjo0.lst

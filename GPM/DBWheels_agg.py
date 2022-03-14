@@ -1,4 +1,5 @@
 import pandas as pd, Database
+from DBWheels_rc import rctree_pd
 
 def add_or_merge_vals(db,symbol,name=None):
 	if name is None:
@@ -18,16 +19,18 @@ def sunion_empty(ls):
 # Small collection of methods for cleaning/reading set elements in a database
 def update_sets(db, types = ('variable','parameter'), clean=True, ignore_alias=False, clean_alias = False):
 	if clean:
-		clean_sets(db,types=types, ignore_alias=ignore_alias)
+		clean_sets(db)
 	read_sets(db, types = types, ignore_alias = ignore_alias)
 	if clean_alias:
 		clean_aliases(db,types)
 	read_aliased_sets(db,ignore_alias)
+	if clean:
+		update_subsets_from_sets(db)
+		update_maps_from_sets(db)
 
-
-def clean_sets(db, types=['variable','parameter'], ignore_alias=False):
+def clean_sets(db):
 	""" create empty indices for all sets  """
-	[db.__setitem__(set_, pd.Index([], name = set_)) for set_ in set(db.gettypes(['set'])-set(['alias_set','alias_map2']))];
+	[db.__setitem__(set_, pd.Index([], name = set_)) for set_ in set(db.gettypes(['set']))-set(['alias_set','alias_map2'])];
 
 def read_sets(db, types=['variable','parameter'], ignore_alias=False):
 	""" read and define set elements from all symbols of type 'types'. """
@@ -38,7 +41,8 @@ def read_sets(db, types=['variable','parameter'], ignore_alias=False):
 
 def clean_aliases(db,types):
 	""" Remove aliases that are not used in variables/parameters """
-	db.update_alias(pd.MultiIndex.from_tuples(active_aliases(db,types), names = ['alias_set','alias_map2']))
+	db.series['alias_'] = pd.MultiIndex.from_tuples(active_aliases(db,types), names = ['alias_set','alias_map2'])
+	db.update_alias()
 
 def active_aliases(db,types):
 	""" Return list of tuples with alias_ that are used in the model variables / mappings"""
@@ -53,8 +57,20 @@ def read_aliased_sets(db,ignore_alias):
 		else:
 			[db.__setitem__(set_ij, pd.Index(all_elements,name=set_ij)) for set_ij in db.alias_dict0[set_i]];
 
+def update_subsets_from_sets(db):
+	[update_subset(db,ss) for ss in db.gettypes(['subset'])];
 
-# MISSING THIS PART: BUT NEED THE PANDAS CONDITION TREES TO CONTINUE.
-		# if clean_up:
-		# 	self.update_subsets_from_sets()
-		# 	self.update_maps_from_sets()
+def update_subset(db,ss):
+	if db.alias(db.get(ss).name) not in db.symbols:
+		db.__setitem__(ss,pd.Index([],name=db.alias(db.get(ss).name)))
+	else:
+		db.__setitem__(ss,rctree_pd(s=db[ss],c=db[db.alias(db.get(ss).name)]))
+
+def update_maps_from_sets(db):
+	[update_map(db,m) for m in db.gettypes(['mapping'])];
+
+def update_map(db,m):
+	if sum([bool(set(db.symbols.keys()).intersection(db.alias_all(s))) for s in db[m].domains])<len(db[m].domains):
+		db.__setitem__(m, pd.MultiIndex.from_tuples([], names = db[m].domains))
+	else:
+		db.__setitem__(m, rctree_pd(s=db[m], c = ('and', [db[s] for s in db[m].domains])))
