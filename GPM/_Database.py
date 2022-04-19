@@ -24,7 +24,7 @@ def type_pandas_(symbol,name=None,type=None,**kwargs):
 	elif isinstance(symbol,pd.Index):
 		return set_or_subset(symbol.name,name)
 	elif isinstance(symbol,(int,float,str,np.generic)):
-		return 'scalar_parameter' if type else 'scalar_variable'
+		return 'scalar_parameter' if type in ('parameter','scalar_parameter') else 'scalar_variable'
 
 def set_or_subset(s_name,name):
 	return 'set' if s_name == name else 'subset'

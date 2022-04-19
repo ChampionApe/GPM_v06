@@ -1,11 +1,12 @@
-import os, pandas as pd, gams, pickle
-from GmsWrite import OrdSet,write_gpy,write_from_db
+import os, gams, pickle
+from _MixTools import OrdSet
+from GmsWrite import write_gpy
 from dreamtools.gamY import Precompiler
 
 def d2t(x):
 	return list(x.items())[0]
 
-def arg2string(x,t):
+def arg2string(x,t=None):
 	if t == 'file':
 		with open(x,"r") as f:
 			return f.read()
@@ -17,18 +18,50 @@ def arg2string(x,t):
 		return x
 
 class Compile:
-	def __init__(self,groups,db):
+	def __init__(self,groups=None):
 		self.declared = OrdSet()
 		self.groups = groups
-		self.db = db
 
-	def declareGroupText(self,g,db):
+	def run(self):
+		for g in self.groups.values():
+			g.compile(self.groups)
+
+	def metaGroup(self,db,gs='all'):
+		if isinstance(gs,Group):
+			return gs
+		elif gs == 'all':
+			metagroup = Group('metagroup',g=list(self.groups.keys()))
+			metagroup.compile(self.groups)
+			return metagroup
+		else:
+			metagroup = Group('metagroup',g=gs)
+			metagroup.compile(self.groups)
+			return metagroup
+
+	def declareGroupsText(self,db,gs='all'):
+		metagroup = self.metaGroup(db,gs=gs)
+		if bool(set(metagroup.conditions)-set(self.declared.v)):
+			out = "Variables \n\t"+"\n\t".join([write_gpy(s=db[var])+"\t\""+db[var].text+"\"" for var in metagroup.conditions if var not in self.declared])+"\n;"
+			self.declared += OrdSet(metagroup.conditions)
+			return out
+		else:
+			return ""
+
+	def declareGroupText(self,db,g):
 		return "\n".join([f"{g.gtype} {write_gpy(db[var])};" for var in g.conditions if var not in self.declared])
 
-	def fixGroupText(self,g,db):
+	def fixGroupsText(self,db,gs):
+		metagroup = self.metaGroup(db,gs=gs)
+		return self.fixGroupText(db,metagroup)
+
+	def fixGroupText(self,db,g):
 		return "\n".join([f"{write_gpy(db[k],c=v,l='.fx')} = {write_gpy(db[k],l='.l')};" for k,v in g.conditions.items()])
 
-	def unfixGroupText(self,g,db):
+	def unfixGroupsText(self,db,gs):
+		metagroup = self.metaGroup(db,gs=gs)
+		return self.unfixGroupText(db,metagroup)
+
+	def unfixGroupText(self,db,g):
 		return "\n".join([f"{write_gpy(db[k],c=v,l='.lo')} = -inf;\n{write_gpy(db[k],c=v,l='.up')} = inf;" for k,v in g.conditions.items()])
 
 class Group:

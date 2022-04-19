@@ -1,3 +1,8 @@
+# Root File for model
+OPTION SYSOUT=OFF, SOLPRINT=OFF, LIMROW=0, LIMCOL=0, DECIMALS=6;
+$SETLOCAL qmark ";
+
+
 $FUNCTION load_level({group}, {gdx}):
   $offlisting
   $GROUP __load_group {group};

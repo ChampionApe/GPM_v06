@@ -1,6 +1,23 @@
 import pandas as pd, Database
 from DBWheels_rc import rctree_pd
 
+def updateSetValues(db,set_,ns):
+	""" Update set values for 'set_' using the namespace 'ns'"""
+	full_map = {k:k if k not in ns else ns[k] for k in db[set_]}
+	for k,v in db.vardom(set_,types=['set','subset','mapping','parameter','variable']).items():
+		[updateSetValue_Symbol(db,k,s,full_map) for s in v];
+
+def updateSetValue_Symbol(db,set_,s,ns):
+	if not db.get(s).empty:
+		if isinstance(db.get(s),pd.MultiIndex):
+			db[s].vals = db.get(s).set_levels(db.get(s).levels[db[s].domains.index(set_)].map(ns),level=set_)
+		elif isinstance(db.get(s),pd.Index):
+			db[s].vals = db[s].index.map(ns).unique()
+		elif isinstance(db[s].index,pd.MultiIndex):
+			db.get(s).index = db[s].index.set_levels(db[s].index.levels[db[s].domains.index(set_)].map(ns),level=set_)
+		elif isinstance(db[s].index,pd.Index):
+			db.get(s).index = db[s].index.map(ns).unique()
+
 def add_or_merge_vals(db,symbol,name=None):
 	if name is None:
 		name = symbol.name
