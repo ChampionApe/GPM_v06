@@ -1,4 +1,5 @@
 import pandas as pd, Database, DBWheels_read
+from _MixTools import NoneInit
 from DBWheels_rc import rc_pd
 from DBWheels_agg import updateSetValues
 _ftype_inputs, _ftype_outputs = ('CES','CES_norm','MNL'), ('CET','CET_norm','MNL_out')
@@ -10,17 +11,17 @@ def reverseDict(d):
 	return {v:k for k,v in d.items()}
 
 class tree:
-	def __init__(self, name, tree = [], io = None, db = {}, f = None,**ns):
+	def __init__(self, name, tree = None, io = None, db = None, f = None,**ns):
 		self.name = name
 		self.db = db
 		self.addFunctionandIO(f,io)
 		self.sp = True if self.f in _scalePreserving else False
 		self.ns = {k:v if k not in ns else ns[k] for k,v in self.standardNamespace.items()}
-		self.tree = tree
+		self.tree = NoneInit(tree,[])
 
 	@property
 	def standardNamespace(self):
-		return {k:k for k in ('n','nn','nnn','s')} | {k: k+'_'+self.name for k in ('map','knot','branch','input','output')}
+		return {k:k for k in ('n','nn','nnn','s')} | {k: k+'_'+self.name for k in ('map','knot','branch','input','output','int')}
 
 	def addFunctionandIO(self,f,io):
 		if f:
@@ -56,6 +57,7 @@ class tree:
 		self['s'] = self.get('map').get_level_values(self.ns['s']).unique()
 		self['input'] = self.get('branch').difference(self.get('knot')) if self.io == 'in' else self.get('knot').difference(self.get('branch'))
 		self['output'] = self.get('branch').difference(self.get('knot')) if self.io == 'out' else self.get('knot').difference(self.get('branch'))
+		self['int'] = (self.get('branch').union(self.get('knot'))).difference(self.get('input').union(self.get('output')))
 
 class tree_from_data(tree):
 	def __init__(self,workbook,sheet,name=None,io=None,f=None,**ns):
@@ -64,11 +66,11 @@ class tree_from_data(tree):
 		self.tree = self.db['mu'].index.to_list()
 
 class AggTree:
-	def __init__(self,name="",trees={},**ns):
+	def __init__(self,name="",trees=None,**ns):
 		self.name=name
 		self.ns = {k:v if k not in ns else ns[k] for k,v in self.standardNamespace.items()}
-		self.trees = trees
-		self.prune = ('n','nn','nnn','s','input','output')
+		self.trees = NoneInit(trees,{})
+		self.prune = ('n','nn','nnn','s','input','output','int')
 		self.db = Database.GpyDB(alias=pd.MultiIndex.from_tuples([(self.n('n'),self.n('nn')), (self.n('n'),self.n('nnn'))]),**{'name':self.name})
 
 	@property
@@ -84,13 +86,13 @@ class AggTree:
 	def __setitem__(self,item,value):
 		self.db[self.n(item)] = value
 
-	def __call__(self,namespace={}):
+	def __call__(self,namespace=None):
 		[tree.attrs_from_tree() for tree in self.trees.values()];
 		self.attrs_from_trees()
 		self.adjust_trees()
 		[self.add_db_prune(tree) for tree in self.trees.values()];
 		if namespace:
-			updateSetValues(self.db,self.n('n'),namespace)
+			updateSetValues(self.db,self.n('n'),NoneInit(namespace,{}))
 		return self
 
 	def add_db_prune(self,tree):
@@ -104,9 +106,10 @@ class AggTree:
 		self['knot']  = pd.MultiIndex.from_tuples(set.union(*[set(tree.get('knot')) for tree in self.trees.values()]), names = [self.n('s'),self.n('n')])
 		inputs = set.union(*[set(tree.get('input')) for tree in self.trees.values()])
 		outputs= set.union(*[set(tree.get('output')) for tree in self.trees.values()])
+		ints = set.union(*[set(tree.get('int')) for tree in self.trees.values()])
 		self['input'] = pd.MultiIndex.from_tuples(inputs-outputs,names = [self.n('s'),self.n('n')])
 		self['output']= pd.MultiIndex.from_tuples(outputs-inputs,names = [self.n('s'),self.n('n')])
-		self['int'] = pd.MultiIndex.from_tuples(inputs.intersection(outputs), names = [self.n('s'),self.n('n')])
+		self['int'] = pd.MultiIndex.from_tuples((inputs.intersection(outputs)).union(ints), names = [self.n('s'),self.n('n')])
 		self['sp_knots'] = pd.MultiIndex.from_tuples(set().union(*[set(tree.get('knot')) for tree in self.trees.values() if tree.sp]), names = [self.n('s'),self.n('n')])
 
 	def adjust_trees(self):

@@ -1,4 +1,5 @@
 import os, pandas as pd, numpy as np, gams, pickle, gams2numpy, gamstransfer, gmdcc
+from _MixTools import dictInit, NoneInit, return_version
 from collections.abc import Iterable
 from six import string_types
 
@@ -8,14 +9,30 @@ admissable_py_types = (pd.Series,pd.Index,int,float,str,np.generic)
 admissable_gamsTypes = (gams.GamsSet, gams.GamsParameter, gams.GamsVariable)
 
 # Content:
-# 1: 	Methods used to identify the type of a symbol.
-# 2: 	Methods used to write gams symbols to pandas representation (gpy_symbols).
-# 		Includes methods for gams._GamsSymbol symbols and symbols from gams._gmd databases (Swig objects). 
-# 3: 	From pandas/python symbol to gamstransfer.Container
-# 4: 	Auxiliary functions used throughout.
-# 5:	Class "gpy": User defined version of symbols.
+# 0: Auxiliary functions used throughout
+# 1: Methods used to identify the type of a symbol.
+# 2: Methods used to write gams symbols to pandas representation (gpy_symbols).
+#	 Includes methods for gams._GamsSymbol symbols and symbols from gams._gmd databases (Swig objects). 
+# 3: From pandas/python symbol to gamstransfer.Container
+# 4: From pandas/python symbol to database.
+# 5. gpy: Class of user-defined version of symbols.
+# 6: A few methods to merge symbols
 
-# 1: TYPES 
+### -------- 	0: Auxiliary functions    -------- ###
+def symbols_db(db):
+	""" return dictionary like version of database""" 
+	return db if type(db) is dict else {symbol.name: symbol for symbol in db}
+
+def tryint(x):
+    try:
+        return x.astype(int)
+    except ValueError:
+        return x
+
+def is_iterable(arg):
+	return isinstance(arg, Iterable) and not isinstance(arg, string_types)
+
+### -------- 	1: Identify types    -------- ###
 def type_pandas_(symbol,name=None,type=None,**kwargs):
 	if isinstance(symbol, pd.Series):
 		return type if type else 'variable'
@@ -61,7 +78,10 @@ def type_GamsSet(name, domains_as_strings):
 		return 'mapping'
 
 
-# 2: GAMS to pandas + gpy_symbols
+
+
+
+### -------- 	2: GAMS to pandas/gpy    -------- ###
 # 2.1: From numpy like data to gpy-arranged dictionaries:
 def np_from_gams(name,db_gams,g2np):
 	return g2np.gmdReadSymbolStr(db_gams,name)
@@ -86,15 +106,14 @@ def index_names_from_np(symbol_name,domains_as_strings):
 def adjust_scalar(domains_as_strings,vals):
 	return vals if domains_as_strings else vals[0]
 
-def gpydict_from_Set(db_gams, g2np, name, domains_as_strings,type_,text=""):
-	return {'vals': index_from_np(np_from_gams(name, db_gams, g2np), name, domains_as_strings), 'name': name, 'text': text, 'type': type_}
+def gpydict_from_Set(db_gams, g2np, name, domains_as_strings,type_,text=None):
+	return {'vals': index_from_np(np_from_gams(name, db_gams, g2np), name, domains_as_strings), 'name': name, 'text': "" if text is None else text, 'type': type_}
 
-def gpydict_from_Variable(db_gams, g2np, name, domains_as_strings,type_, text=""):
-	return {'vals': adjust_scalar(domains_as_strings, df_from_variable(np_from_gams(name,db_gams,g2np), name, domains_as_strings,**{'attributes': ['level']})['level']), 'name': name, 'text': text, 'type': type_}
+def gpydict_from_Variable(db_gams, g2np, name, domains_as_strings,type_, text=None):
+	return {'vals': adjust_scalar(domains_as_strings, df_from_variable(np_from_gams(name,db_gams,g2np), name, domains_as_strings,**{'attributes': ['level']})['level']), 'name': name, 'text': "" if text is None else text, 'type': type_}
 
-def gpydict_from_Parameter(db_gams, g2np, name, domains_as_strings,type_, text=""):
-	return {'vals': adjust_scalar(domains_as_strings, df_from_parameter(np_from_gams(name,db_gams,g2np), name, domains_as_strings)['value']), 'name': name, 'text': text, 'type': type_}
-
+def gpydict_from_Parameter(db_gams, g2np, name, domains_as_strings,type_, text=None):
+	return {'vals': adjust_scalar(domains_as_strings, df_from_parameter(np_from_gams(name,db_gams,g2np), name, domains_as_strings)['value']), 'name': name, 'text': "" if text is None else text, 'type': type_}
 
 # 2.2: From GamsDatabase._gmd symbols to gpy_symbol dictionaries:
 def gpydict_from_GmdSymbol(db_gmd,g2np,symbol):
@@ -145,7 +164,6 @@ def AliasTupleFromGmd(db_gmd,symbol,rc):
 def GetParentFromGmd(db_gmd,subtype,rc):
 	return gmdcc.gmdSymbolInfo(db_gmd, gmdcc.gmdGetSymbolByNumberPy(db_gmd,subtype-1,rc), gmdcc.GMD_NAME)[-1]
 
-
 # 2.3: From gams._GamsSymbol to gpy_symbol dictionaries:
 def gpydict_from_GamsSymbol(db_gams, g2np, symbol):
 	if isinstance(symbol, gams.GamsSet):
@@ -165,7 +183,9 @@ def gpydict_from_GamsParameter(db_gams, g2np, symbol):
 	return gpydict_from_Parameter(db_gams, g2np, symbol.name, symbol.domains_as_strings, type_GamsParameter(symbol.domains_as_strings), symbol.text)
 
 
-# 3: From pandas/python symbol to container
+
+
+### -------- 	3: Pandas/python to gams container    -------- ###
 def gamstransfer_from_py_(symbol,container):
 	""" symbol = gpy, container = gamstransfer.Container """
 	if symbol.type == 'set':
@@ -183,31 +203,35 @@ def gamstransfer_from_py_(symbol,container):
 	elif symbol.type == 'parameter':
 		gamstransferParameter_from_py(symbol.df, symbol.name, container, description=symbol.text)
 
-def gamstransferSet_from_py(index,container,description=""):
-	gamstransfer.Set(container, index.name, description=description, records = index.astype(str))
+def gamstransferSet_from_py(index,container,description=None):
+	gamstransfer.Set(container, index.name, description="" if description is None else description, records = index.astype(str))
 
-def gamstransferSubset_from_py(index,name,container,description=""):
-	gamstransfer.Set(container, name, index.name, description=description, records = index.astype(str))
+def gamstransferSubset_from_py(index,name,container,description=None):
+	gamstransfer.Set(container, name, index.name, description="" if description is None else description, records = index.astype(str))
 
-def gamstransferMapping_from_py(index,name,container,description=""):
-	gamstransfer.Set(container, name, index.names, description=description, records = index.to_frame(index=False).astype(str))
+def gamstransferMapping_from_py(index,name,container,description=None):
+	gamstransfer.Set(container, name, index.names, description="" if description is None else description, records = index.to_frame(index=False).astype(str))
 
-def gamstransferScalarVariable_from_py(scalar, name, container, description=""):
+def gamstransferScalarVariable_from_py(scalar, name, container, description=None):
 	if isinstance(scalar,pd.DataFrame):
-		gamstransfer.Variable(container, name, description = description, records = scalar)
+		gamstransfer.Variable(container, name, description = "" if description is None else description, records = scalar)
 	elif not is_iterable(scalar):
-		gamstransfer.Variable(container, name, description = description, records = pd.DataFrame([scalar], columns = ['level']))
+		gamstransfer.Variable(container, name, description = "" if description is None else description, records = pd.DataFrame([scalar], columns = ['level']))
 
-def gamstransferVariable_from_py(df, name, container, description = ""):
-	gamstransfer.Variable(container, name, domain= df.index.names, description=description, records = df.reset_index().astype({k:str for k in df.index.names}))
+def gamstransferVariable_from_py(df, name, container, description = None):
+	gamstransfer.Variable(container, name, domain= df.index.names, description="" if description is None else description, records = df.reset_index().astype({k:str for k in df.index.names}))
 
-def gamstransferScalarParameter_from_py(scalar, name, container, description=""):
+def gamstransferScalarParameter_from_py(scalar, name, container, description=None):
 	gamstransfer.Parameter(container, name, description="", records = scalar)
 
-def gamstransferParameter_from_py(df, name, container, description= ""):
-	gamstransfer.Parameter(container, name, domain = df.index.names, description=description, records = df.reset_index().astype({k:str for k in df.index.names}))
+def gamstransferParameter_from_py(df, name, container, description= None):
+	gamstransfer.Parameter(container, name, domain = df.index.names, description="" if description is None else description, records = df.reset_index().astype({k:str for k in df.index.names}))
 
-# 4: From pandas/python symbol to database
+
+
+
+
+### -------- 	4: Pandas/python to database    -------- ###
 def gpy2db_gams_AOM(s,db,g2np,merge=True):
 	if s.name in gamsdb_symbols(db):
 		gpy2db_gams(s,db[s.name],db,g2np,merge=merge)
@@ -257,42 +281,9 @@ def variable2np(s):
 	return AdjIndex(s.df.assign(**{k:v for k,v in gamstransfer.Variable._default_values['free'].items() if k!='level'})).to_numpy()
 
 
-# A: AUXILIARY FUNCTIONS
-def symbols_db(db):
-	""" return dictionary like version of database""" 
-	if type(db) is dict:
-		return db
-	else:
-		return {symbol.name: symbol for symbol in db}
 
-def return_version(x,dict_):
-	if x not in dict_:
-		return x
-	elif (x+'_0') not in dict_:
-		return x+'_0'
-	else:
-		maxInt = max([int(y.split('_')[-1]) for y in dict_ if (y.rsplit('_',1)[0]==x and IfInt(y.split('_')[-1]))])
-		return x+'_'+str(maxInt+1)
 
-def IfInt(x):
-	try:
-		int(x)
-		return True
-	except ValueError:
-		return False
-
-def kw_df(kwargs,key,df_val):
-	return df_val if key not in kwargs else kwargs[key]
-
-def tryint(x):
-    try:
-        return x.astype(int)
-    except ValueError:
-        return x
-
-def is_iterable(arg):
-	return isinstance(arg, Iterable) and not isinstance(arg, string_types)
-
+### -------- 	5. gpy: class of symbols    -------- ###
 class gpy:
 	""" Customized class of symbols used in the PM/GPM database classes. """
 	def __init__(self,symbol,**kwargs):
@@ -304,7 +295,7 @@ class gpy:
 			self.vals = symbol
 			self.name = kwargs['name'] if 'name' in kwargs else symbol.name
 			self.type = type_pandas_(symbol, **kwargs)
-			self.text = kw_df(kwargs,'text',"")
+			self.text = dictInit('text',"",kwargs)
 
 	def __iter__(self):
 		return iter(self.vals)
@@ -338,13 +329,15 @@ class gpy:
 		return self.vals.to_frame(name='level' if self.type == 'variable' else 'value')
 
 
-# ADD OR MERGE FUNCTIONS
+
+
+### -------- 	6: Add or merge symbols    -------- ###
 def merge_gpy_vals(s1,s2):
 	if isinstance(s1,pd.Series):
 		return s1.combine_first(s2)
 	elif isinstance(s1,pd.Index):
 		return s1.union(s2)
-	elif type_pandas_(s1) in ('scalar_variable','scalar_parameter'):
+	elif type_pandas_(s1) in ['scalar_variable','scalar_parameter']:
 		return s1
 
 def GpyDBs_AOM_Second(db,symbol):

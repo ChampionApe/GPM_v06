@@ -2,7 +2,7 @@ from Database import *
 
 # Robust methods
 # 1: Merge database methods
-def robust_merge_dbs(db1,db2,priority='second'):
+def robust_merge_dbs(db1,db2,priority=None):
 	""" merge db2 into db1; priority = 'first' uses db1 if there is overlap. 'second' uses db2. This is much slower if priority = 'first'. """
 	if isinstance(db1,(GpyDB,SeriesDB,dict)):
 		if isinstance(db2,(GpyDB,SeriesDB,dict)):
@@ -26,23 +26,23 @@ def get_g2np(db):
 def iters_db_py(db):
 	return db if isinstance(db,(GpyDB,SeriesDB)) else db.values()
 
-def merge_dbs_GpyDB(db1,db2,priority='second'):
+def merge_dbs_GpyDB(db1,db2,priority=None):
 	"""" merge db2 into db1. """
-	if priority == 'second':
+	if priority in ['second',None]:
 		[GpyDBs_AOM_Second(db1,symbol) for symbol in iters_db_py(db2)];
 	elif priority== 'first':
 		[GpyDBs_AOM_First(db1,symbol) for symbol in iters_db_py(db2)];
 
-def merge_dbs_GpyDB_gams(db_py,db_gms,g2np,priority='second'):
+def merge_dbs_GpyDB_gams(db_py,db_gms,g2np,priority=None):
 	""" Merge db_gms into db_py. """
-	if priority == 'second':
+	if priority in ['second',None]:
 		[GpyDBs_AOM_Second(db_py,symbol) for symbol in dict_from_GamsDatabase(db_gms,g2np).values()];
 	elif priority == 'first':
 		[GpyDBs_AOM_First(db_py,symbol) for symbol in dict_from_GamsDatabase(db_gms,g2np).values()];
 
-def merge_dbs_gams_GpyDB(db_gms,db_py,g2np,priority='second'):
+def merge_dbs_gams_GpyDB(db_gms,db_py,g2np,priority=None):
 	""" merge db_py into db_gms."""
-	if priority == 'second':
+	if priority in ['second',None]:
 		[gpy2db_gams_AOM(s,db_gms,g2np,merge=True) for s in iters_db_py(db_py)];
 	elif priority == 'first':
 		if isinstance(db_py,GpyDB):
@@ -51,12 +51,12 @@ def merge_dbs_gams_GpyDB(db_gms,db_py,g2np,priority='second'):
 			d = db_py.database.copy()
 		elif type(db_py) is dict:
 			d = db_py.copy()
-		merge_dbs_GpyDB_gams(d, db_gms, g2np, priority='second') # merge db_gms into dictionary of gpy symbols.
+		merge_dbs_GpyDB_gams(d, db_gms, g2np,priority='second') # merge db_gms into dictionary of gpy symbols.
 		merge_dbs_gams_GpyDB(db_gms, d, g2np,priority='second') # merge gpy symbols into gams.
 
-def merge_dbs_gams(db1,db2,g2np,priority='second'):
+def merge_dbs_gams(db1,db2,g2np,priority=None):
 	""" Merge db2 into db1. """
-	if priority=='second':
+	if priority in ['second',None]:
 		[gpy2db_gams_AOM(s,db1,g2np,merge=True) for s in dict_from_GamsDatabase(db2,g2np).values()];
 	elif priority=='first':
 		d = dict_from_GamsDatabase(db2,g2np) # copy of db2.

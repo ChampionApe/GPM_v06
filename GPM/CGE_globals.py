@@ -1,16 +1,17 @@
 import pandas as pd
 from _Database import gpy
+from _MixTools import NoneInit,dictInit
 
 def df(x, kwargs):
     return x if x not in kwargs else kwargs[x]
-def add_settings(version, kwargs_ns={}, kwargs_vals={}, **kwargs_oth):
-    return eval(version)(kwargs_ns=kwargs_ns, kwargs_vals=kwargs_vals, **kwargs_oth)
+def add_settings(version, kwargs_ns=None, kwargs_vals=None, **kwargs_oth):
+    return eval(version)(kwargs_ns=NoneInit(kwargs_ns,{}), kwargs_vals=NoneInit(kwargs_vals,{}), **kwargs_oth)
 
 class SmallOpen:
 	""" Small open economy, exogenous long run interest rates, inflation rates and growth rates."""
-	def __init__(self, kwargs_ns={}, kwargs_vals={},**kwargs_oth):
-		self.ns = {k: df(k, kwargs_ns) for k in self.LongRunParameters + self.Time}
-		self.db = self.Time_values(kwargs_vals) | self.LRP_values(kwargs_vals)
+	def __init__(self, kwargs_ns=None, kwargs_vals=None,**kwargs_oth):
+		self.ns = {k: dictInit(k,k,NoneInit(kwargs_ns,{})) for k in self.LongRunParameters + self.Time}
+		self.db = self.Time_values(NoneInit(kwargs_vals,{})) | self.LRP_values(NoneInit(kwargs_vals,{}))
 
 	@property
 	def LongRunParameters(self):

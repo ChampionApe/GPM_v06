@@ -1,5 +1,6 @@
 import os, gams, pickle
-from _MixTools import OrdSet
+from copy import deepcopy
+from _MixTools import OrdSet, dictInit, NoneInit
 from GmsWrite import write_gpy
 from dreamtools.gamY import Precompiler
 
@@ -20,7 +21,11 @@ def arg2string(x,t=None):
 class Compile:
 	def __init__(self,groups=None):
 		self.declared = OrdSet()
-		self.groups = groups
+		self.groups = NoneInit(groups,{})
+
+	@property
+	def groupsCopy(self):
+		return {k: deepcopy(v) for k,v in self.groups.items()}
 
 	def run(self):
 		for g in self.groups.values():
@@ -30,12 +35,12 @@ class Compile:
 		if isinstance(gs,Group):
 			return gs
 		elif gs == 'all':
-			metagroup = Group('metagroup',g=list(self.groups.keys()))
-			metagroup.compile(self.groups)
+			metagroup = Group('metagroup',g=self.groups.keys())
+			metagroup.compile(groups=self.groupsCopy)
 			return metagroup
 		else:
 			metagroup = Group('metagroup',g=gs)
-			metagroup.compile(self.groups)
+			metagroup.compile(groups=self.groupsCopy)
 			return metagroup
 
 	def declareGroupsText(self,db,gs='all'):
@@ -65,14 +70,14 @@ class Compile:
 		return "\n".join([f"{write_gpy(db[k],c=v,l='.lo')} = -inf;\n{write_gpy(db[k],c=v,l='.up')} = inf;" for k,v in g.conditions.items()])
 
 class Group:
-	def __init__(self,name,v=[],g=[],neg_v=[],neg_g=[],out={},out_neg={},gtype = 'variable'):
+	def __init__(self,name,v=None,g=None,neg_v=None,neg_g=None,out=None,out_neg=None,gtype='variable'):
 		self.name = name
-		self.v = v
-		self.g = OrdSet(g)
-		self.neg_v = neg_v
-		self.neg_g = OrdSet(neg_g)
-		self.out = {}
-		self.out_neg = {}
+		self.v = NoneInit(v,[])
+		self.g = OrdSet(NoneInit(g,[]))
+		self.neg_v = NoneInit(neg_v,[])
+		self.neg_g = OrdSet(NoneInit(neg_g,[]))
+		self.out = NoneInit(out,{})
+		self.out_neg = NoneInit(out_neg,{})
 		self.gtype = gtype # should be either variable or parameter to indicate the type of symbol group.
 
 	def c_var(self,name):
@@ -88,7 +93,8 @@ class Group:
 	def conditions(self):
 		return {name: self.conditions_var(name) for name in self.out}
 
-	def compile(self,groups={}):
+	def compile(self,groups=None):
+		groups = NoneInit(groups,{})
 		[self.Add(t[0],t[1]) for t in self.v];
 		[self.AddGroup(g,groups) for g in self.g];
 		[self.AddNeg(t[0],t[1]) for t in self.neg_v];

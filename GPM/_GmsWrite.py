@@ -1,6 +1,6 @@
 from _Database import gpy
 from dreamtools.gamY import Precompiler
-from _MixTools import OrdSet
+from _MixTools import OrdSet,NoneInit
 import regex_gms
 
 # Four main types of methods: 
@@ -46,6 +46,18 @@ $FUNCTION load_fixed({group}, {gdx}):
   $ENDLOOP
   $onlisting
 $ENDFUNCTION
+$FUNCTION SolveEmptyNLP({name})
+variable randomnameobj;  
+randomnameobj.L = 0;
+
+EQUATION E_EmptyNLPObj;
+E_EmptyNLPObj..    randomnameobj  =E=  0;
+
+Model M_SolveEmptyNLP /
+E_EmptyNLPObj, {name}
+/;
+solve M_SolveEmptyNLP using NLP min randomnameobj;
+$ENDFUNCTION
 """
 
 _GmsWriteFromDB = {'sets': ('sets','alias','sets_other','sets_load','par','par_load'),
@@ -53,11 +65,11 @@ _GmsWriteFromDB = {'sets': ('sets','alias','sets_other','sets_load','par','par_l
 					'vars':  ('sets','alias','sets_other','sets_load','par','par_load','var','var_load')}
 default_options_root = {'SYSOUT': 'OFF', 'SOLPRINT': 'OFF', 'LIMROW': '0', 'LIMCOL': '0', 'DECIMALS': '6'}
 
-
 # -------------------------------------- 2 : write_gpy -------------------------------------- #
 
 
-def write_gpy(s=None,c=None,alias={}, lag = {},l="",**kwargs):
+def write_gpy(s=None, c=None, alias=None, lag=None, l="",**kwargs):
+	alias = NoneInit(alias,{})
 	if s.type == 'set':
 		return s.name+condition(c=c) if s.name not in alias else alias[s.name]+condition(c=c)
 	elif s.type in ('subset','mapping'):
@@ -90,8 +102,8 @@ def write_tuple(tup):
 	else:
 		return f"({f' {tup[0]} '.join([point(vi) for vi in tup[1]])})"
 
-def gmsdomains(s,alias={},lag={}):
-	return list2string([alias.get(item,item)+str(lag.get(item,'')) for item in s.domains])
+def gmsdomains(s,alias=None,lag=None):
+	return list2string([NoneInit(alias,{}).get(item,item)+str(NoneInit(lag,{}).get(item,'')) for item in s.domains])
 
 def list2string(list_):
 	return '[{x}]'.format(x=','.join(list_)) if list_ else ''
@@ -100,51 +112,51 @@ def list2string(list_):
 
 # -------------------------------------- 3 : Write_from_db -------------------------------------- #
 
-def write_from_db(db,types=('sets','alias','sets_other','sets_load','par','par_load','var','var_load'),exceptions=OrdSet(),exceptions_load=OrdSet(),gdx=None,onmulti=True):
+def write_from_db(db,types=None,exceptions=None,exceptions_load=None,gdx=None,onmulti=True):
 	alltypes = {'sets': write_sets(db,exceptions=exceptions), 'alias': write_aliased_sets(db,exceptions=exceptions),'sets_other': write_sets_other(db,exceptions=exceptions), 'sets_load': write_sets_load(db,gdx,onmulti=onmulti,exceptions_load=exceptions_load),
 				'par': write_parameters(db,exceptions), 'par_load': write_parameters_load(db,gdx,onmulti=onmulti,exceptions_load=exceptions_load),
 				'var': write_variables(db,exceptions), 'var_load': write_variables_load(db,gdx,onmulti=onmulti,exceptions_load=exceptions_load)}
 	return {k:v for k,v in alltypes.items() if k in types}
 
 def writeAux(start,end,itersym,joinby='\n\t'):
-	return start+'\n\t'+joinby.join(itersym)+'\n'+end+'\n\n' if bool(itersym) else ''
+	return start+joinby+joinby.join(itersym)+'\n'+end+'\n\n' if bool(itersym) else ''
 
-def write_sets(db,exceptions=OrdSet()):
-	return writeAux('sets',';',[write_gpy(s=db[s]) for s in (OrdSet(db.gettypes('set'))-OrdSet(db.get('alias_map2'))-exceptions)])
+def write_sets(db,exceptions=None):
+	return writeAux('sets',';',[write_gpy(s=db[s]) for s in (OrdSet(db.gettypes('set'))-OrdSet(db.get('alias_map2'))-NoneInit(exceptions,OrdSet()))])
 
-def write_aliased_sets(db,exceptions=OrdSet()):
+def write_aliased_sets(db,exceptions=None):
 	out_str = ''
 	for k,v in db.alias_dict.items():
-		if k not in exceptions:
+		if k not in NoneInit(exceptions,[]):
 			out_str += 'alias({x},{y});\n'.format(x=k, y=','.join(list(v)))
 	return out_str+'\n'
 
-def write_sets_other(db,exceptions=OrdSet()):
-	return writeAux('sets',';',[write_gpy(s=db[s]) for s in (OrdSet(db.gettypes(('subset','mapping')))-exceptions)])
+def write_sets_other(db,exceptions=None):
+	return writeAux('sets',';',[write_gpy(s=db[s]) for s in (OrdSet(db.gettypes(('subset','mapping')))-NoneInit(exceptions,OrdSet()))])
 
-def write_sets_load(db,gdx,onmulti=True,exceptions_load=OrdSet()):
-	itersym = ['$load '+s for s in (OrdSet(db.gettypes(['set']))-OrdSet(db.get('alias_map2'))-exceptions_load)]+['$load '+s for s in (OrdSet(db.gettypes(['subset','mapping']))-exceptions_load)];
-	start = '$GDXIN '+gdx+'\n'+'$onMulti\n' if onmulti else '$GDXIN '+gdx+'\n'
+def write_sets_load(db,gdx,onmulti=True,exceptions_load=None):
+	itersym = ['$load '+s for s in (OrdSet(db.gettypes(['set']))-OrdSet(db.get('alias_map2'))-NoneInit(exceptions_load,OrdSet()))]+['$load '+s for s in (OrdSet(db.gettypes(['subset','mapping']))-NoneInit(exceptions_load,OrdSet()))];
+	start = '$GDXIN '+gdx+'\n'+'$onMulti' if onmulti else '$GDXIN '+gdx
 	end   = '$GDXIN\n' +'$offMulti;' if onmulti else '$GDXIN;'
-	return writeAux(start,end,itersym)
+	return writeAux(start,end,itersym,joinby='\n')
 
-def write_parameters(db,exceptions=OrdSet()):
-	return writeAux('parameters',';',[write_gpy(s=db[s]) for s in (OrdSet(db.gettypes(('scalar_parameter','parameter')))-exceptions)])
+def write_parameters(db,exceptions=None):
+	return writeAux('parameters',';',[write_gpy(s=db[s]) for s in (OrdSet(db.gettypes(('scalar_parameter','parameter')))-NoneInit(exceptions,OrdSet()))])
 
-def write_parameters_load(db,gdx,onmulti=True,exceptions_load=OrdSet()):
-	itersym = ['$load '+s for s in (OrdSet(db.gettypes(('scalar_parameter','parameter')))-exceptions_load)];
-	start = '$GDXIN '+gdx+'\n'+'$onMulti\n' if onmulti else '$GDXIN '+gdx+'\n'
+def write_parameters_load(db,gdx,onmulti=True,exceptions_load=None):
+	itersym = ['$load '+s for s in (OrdSet(db.gettypes(('scalar_parameter','parameter')))-NoneInit(exceptions_load,OrdSet()))];
+	start = '$GDXIN '+gdx+'\n'+'$onMulti' if onmulti else '$GDXIN '+gdx
 	end   = '$GDXIN\n' +'$offMulti;' if onmulti else '$GDXIN;'
-	return writeAux(start,end,itersym)	
+	return writeAux(start,end,itersym,joinby='\n')
 
-def write_variables(db,exceptions=OrdSet()):
-	return writeAux('variables',';',[write_gpy(s=db[s]) for s in (OrdSet(db.gettypes(('scalar_variable','variable')))-exceptions)])
+def write_variables(db,exceptions=None):
+	return writeAux('variables',';',[write_gpy(s=db[s]) for s in (OrdSet(db.gettypes(('scalar_variable','variable')))-NoneInit(exceptions,OrdSet()))])
 
-def write_variables_load(db,gdx,onmulti=True,exceptions_load=OrdSet()):
-	itersym = ['$load '+s for s in (OrdSet(db.gettypes(('scalar_variable','variable')))-exceptions_load)];
-	start = '$GDXIN '+gdx+'\n'+'$onMulti\n' if onmulti else '$GDXIN '+gdx+'\n'
+def write_variables_load(db,gdx,onmulti=True,exceptions_load=None):
+	itersym = ['$load '+s for s in (OrdSet(db.gettypes(('scalar_variable','variable')))-NoneInit(exceptions_load,OrdSet()))];
+	start = '$GDXIN '+gdx+'\n'+'$onMulti' if onmulti else '$GDXIN '+gdx
 	end   = '$GDXIN\n' +'$offMulti;' if onmulti else '$GDXIN;'
-	return writeAux(start,end,itersym)
+	return writeAux(start,end,itersym,joinby='\n')
 
 # -------------------------------------- 3: Default components -------------------------------------- #
 
@@ -190,8 +202,8 @@ def args_declare_groups(precompiler,declare):
 	arg2string(declare,precompiler)
 	return declare
 
-def write_declare_groups(precompiler,declare_text='',from_db='vars'):
-	if from_db in ('declarevars','vars'):
+def write_declare_groups(precompiler,declare_text='',from_db=None):
+	if from_db in ['declarevars','vars']:
 		arg2string(declare_text,precompiler)
 		return ''
 	else:
@@ -200,16 +212,16 @@ def write_declare_groups(precompiler,declare_text='',from_db='vars'):
 # -------------------------------------- 3.4: Load groups -------------------------------------- #
 
 def write_load_groups(groups=None,g_endo=None,gdx=None,from_db='vars',precompiler=None):
-	return '' if from_db in ('declarevars','vars') else arg2string(write_loadgroups_gamY(groups,g_endo=g_endo,gdx=gdx),precompiler)
+	return '' if from_db in ['declarevars','vars'] else arg2string(write_loadgroups_gamY(groups,g_endo=g_endo,gdx=gdx),precompiler)
 
 def write_loadgroups_gamY(groups,g_endo=None,gdx=None):
 	endo =  ''.join([write_loadgroup_gamY(group,gdx,level='level') for group in g_endo])
 	return endo+''.join([write_loadgroup_gamY(group,gdx,level='fixed') for group in (OrdSet(groups.keys())-g_endo)])
 
 def write_loadgroup_gamY(group,gdx,level='fixed'):
-	if level=='fixed':
+	if level == 'fixed':
 		out_str = '@load_fixed({group},%qmark%{gdx}");\n'.format(group=group,gdx=gdx)
-	elif level=='level':
+	elif level == 'level':
 		out_str = '@load_level({group},%qmark%{gdx}");\n'.format(group=group,gdx=gdx)
 	return out_str
 
@@ -238,3 +250,16 @@ def write_fix_gamY(precompiler,g_exo):
 
 def write_unfix_gamY(precompiler,g_endo):
 	return arg2string(args_unfix_gamY(g_endo),precompiler)
+
+# ----------------------------------- 4: Loop, update, solve, store --------------------------------------	#
+def strEmpty(x,pre='',post=''):
+	return ''+x+post if x else ''
+def updateVars(shock,db,shock_db,updateDict):
+	return ';\n\t'.join([f"{write_gpy(db[k],c=v,l='.fx')} = {write_gpy(shock_db[k+'_'+shock])}" for k,v in updateDict.items()])+';'
+def updateSolVars(shock,db,shock_db,updateSolDict):
+	return ';\n\t'.join([f"{write_gpy(shock_db[k],c=v,l='.fx')} = {write_gpy(db[k.split('sol_',1)[-1].rsplit('_'+shock,1)[0]],l='.l')}" for k,v in updateSolDict.items()])+';'
+def loopUpdateSolveStoresol(domains, shock, db, shock_db, updateDict=None, updateSolDict = None, conditional=None, solve = None, model = None):
+	return f"loop({domains}{strEmpty(conditional,pre='$(',post=')')},\n\t{updateVars(shock,db,shock_db,NoneInit(updateDict,{}))}\n\t{write_solve(solve=solve,name=model)}\n\t{updateSolVars(shock,db,shock_db,NoneInit(updateSolDict,{}))}\n);"
+def declareAndLoop(domains, shock, db, shock_db, updateDict=None, updateSolDict=None, conditional=None, solve=None, model=None, from_db = 'vars',gdx=None,**kwargs):
+	text = write_declare(shock_db,f"""%{shock_db.name}%""" if gdx is None else gdx,from_db=from_db,**kwargs)
+	return text+'\n'+loopUpdateSolveStoresol(domains, shock, db, shock_db,updateDict=updateDict, updateSolDict = updateSolDict, conditional=conditional, solve = solve, model = model)

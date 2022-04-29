@@ -1,5 +1,6 @@
 import pandas as pd, numpy as np
-from _Database import gpy
+from Database import gpy, getindex, getvalues
+from _MixTools import NoneInit
 rctree_admissable_types = (gpy,pd.Index, pd.Series, pd.DataFrame)
 rctree_scalar_types = (int,float,np.generic)
 def tryint(x):
@@ -8,7 +9,7 @@ def tryint(x):
     except ValueError:
         return x
 
-def rc_AdjGpy(s, c = None, alias = {}, lag = {}, pm = False, **kwargs):
+def rc_AdjGpy(s, c = None, alias = None, lag = None, pm = False, **kwargs):
 	if c:
 		copy = s.copy()
 		copy.vals = rc_pd(s=s,c=c,alias=alias,lag=lag,pm=pm)
@@ -16,12 +17,12 @@ def rc_AdjGpy(s, c = None, alias = {}, lag = {}, pm = False, **kwargs):
 	else:
 		return AdjGpy(s,alias=alias, lag = lag)
 
-def AdjGpy(symbol, alias = {}, lag = {}):
+def AdjGpy(symbol, alias = None, lag = None):
 	copy = symbol.copy()
 	copy.vals = rc_AdjPd(symbol.vals, alias=alias, lag = lag)
 	return copy
 
-def rc_AdjPd(symbol, alias = {}, lag = {}):
+def rc_AdjPd(symbol, alias = None, lag = None):
 	if isinstance(symbol, pd.Index):
 		return AdjAliasInd(AdjLagInd(symbol, lag=lag), alias = alias)
 	elif isinstance(symbol, pd.Series):
@@ -35,7 +36,7 @@ def rc_AdjPd(symbol, alias = {}, lag = {}):
 	else:
 		raise TypeError(f"rc_AdjPd only uses instances {rctree_admissable_types} (and no scalars). Input was type {type(symbol)}")
 
-def AdjLagInd(index_,lag={}):
+def AdjLagInd(index_,lag=None):
 	if lag:
 		if isinstance(index_,pd.MultiIndex):
 			return index_.set_levels([index_.levels[index_.names.index(k)]+tryint(v) for k,v in lag.items()], level=lag.keys())
@@ -44,11 +45,12 @@ def AdjLagInd(index_,lag={}):
 	else:
 		return index_
 
-def AdjAliasInd(index_,alias={}):
-	return index_.set_names([x if x not in alias.keys() else alias[x] for x in index_.names])
+def AdjAliasInd(index_,alias=None):
+	alias = NoneInit(alias,{})
+	return index_.set_names([x if x not in alias else alias[x] for x in index_.names])
 
 # Subsetting methods:
-def rc_pd(s=None,c=None,alias={},lag ={}, pm = True, **kwargs):
+def rc_pd(s=None,c=None,alias=None,lag=None, pm = True, **kwargs):
 	if isinstance(s,rctree_scalar_types):
 		return s
 	elif isinstance(s, gpy) and (s.type in ('scalar_variable','scalar_parameter')):
@@ -56,20 +58,20 @@ def rc_pd(s=None,c=None,alias={},lag ={}, pm = True, **kwargs):
 	else:
 		return rctree_pd(s=s, c = c, alias = alias, lag = lag, pm = pm, **kwargs)
 
-def rc_pdInd(s=None,c=None,alias={},lag={},pm=True,**kwargs):
+def rc_pdInd(s=None,c=None,alias=None,lag=None,pm=True,**kwargs):
 	if isinstance(s,rctree_scalar_types) or (isinstance(s,gpy) and (s.type in ('scalar_variable','scalar_parameter'))):
 		return None
 	else:
 		return rctree_pdInd(s=s,c=c,alias=alias,lag=lag,pm=pm,**kwargs)
 
-def rctree_pd(s=None,c=None,alias={},lag ={}, pm = True, **kwargs):
+def rctree_pd(s=None,c=None,alias=None,lag =None, pm = True, **kwargs):
 	adj = rc_AdjPd(s,alias=alias,lag=lag)
 	if pm:
 		return getvalues(adj)[point_pm(getindex(adj), c, pm)]
 	else:
 		return getvalues(adj)[point(getindex(adj) ,c)]
 
-def rctree_pdInd(s=None,c=None,alias={},lag={},pm=True,**kwargs):
+def rctree_pdInd(s=None,c=None,alias=None,lag=None,pm=True,**kwargs):
 	adj = rc_AdjPd(s,alias=alias,lag=lag)
 	if pm:
 		return getindex(adj)[point_pm(getindex(adj), c, pm)]
@@ -127,18 +129,6 @@ def overlap_pm(pdObjIndex,index_):
 
 def reorder(index_,o):
 	return index_ if len(index_.names)==1 else index_.reorder_levels(o)
-
-def getindex(pdObj):
-	if isinstance(pdObj,(gpy,pd.Series,pd.DataFrame)):
-		return pdObj.index
-	elif isinstance(pdObj, pd.Index):
-		return pdObj
-
-def getvalues(symbol):
-	if isinstance(symbol, gpy):
-		return symbol.vals
-	elif isinstance(symbol,(pd.Series,pd.DataFrame,pd.Index)):
-		return symbol
 
 def translate_k2pd(l,k):
 	if k == 'and':

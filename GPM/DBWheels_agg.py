@@ -1,5 +1,6 @@
 import pandas as pd, Database
 from DBWheels_rc import rctree_pd
+from _MixTools import NoneInit
 
 def updateSetValues(db,set_,ns):
 	""" Update set values for 'set_' using the namespace 'ns'"""
@@ -34,7 +35,7 @@ def sunion_empty(ls):
 		return set()
 
 # Small collection of methods for cleaning/reading set elements in a database
-def update_sets(db, types = ('variable','parameter'), clean=True, ignore_alias=False, clean_alias = False):
+def update_sets(db, types = None, clean=True, ignore_alias=False, clean_alias = False):
 	if clean:
 		clean_sets(db)
 	read_sets(db, types = types, ignore_alias = ignore_alias)
@@ -49,12 +50,12 @@ def clean_sets(db):
 	""" create empty indices for all sets  """
 	[db.__setitem__(set_, pd.Index([], name = set_)) for set_ in set(db.gettypes(['set']))-set(['alias_set','alias_map2'])];
 
-def read_sets(db, types=['variable','parameter'], ignore_alias=False):
+def read_sets(db, types=None, ignore_alias=False):
 	""" read and define set elements from all symbols of type 'types'. """
 	if ignore_alias:
-		[add_or_merge_vals(db, symbol.index.get_level_values(set_).unique()) for symbol in db.gettypes(types).values() for set_ in (set(symbol.domains)-db.alias_notin_db)];
+		[add_or_merge_vals(db, symbol.index.get_level_values(set_).unique()) for symbol in db.gettypes(NoneInit(types,['variable','parameter'])).values() for set_ in (set(symbol.domains)-db.alias_notin_db)];
 	else:
-		[add_or_merge_vals(db, symbol.index.get_level_values(set_).unique()) for symbol in db.gettypes(types).values() for set_ in set(symbol.domains)];
+		[add_or_merge_vals(db, symbol.index.get_level_values(set_).unique()) for symbol in db.gettypes(NoneInit(types,['variable','parameter'])).values() for set_ in set(symbol.domains)];
 
 def clean_aliases(db,types):
 	""" Remove aliases that are not used in variables/parameters """

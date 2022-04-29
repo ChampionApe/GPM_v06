@@ -11,11 +11,28 @@ def dict_from_GmdDatabase(db_gmd,g2np):
 def gams_from_db_py(db_py,db_gams,g2np,merge=False):
 	[gpy2db_gams_AOM(s,db_gams,g2np,merge=merge) for s in db_py];
 
+def getindex(symbol):
+	""" Defaults to None if no index is defined. """
+	if isinstance(symbol,(gpy,pd.Series,pd.DataFrame)):
+		return symbol.index
+	elif isinstance(symbol, pd.Index):
+		return symbol
+	elif not is_iterable(symbol):
+		return None
+
+def getvalues(symbol):
+	""" Defaults to the index, if no values are defined (e.g. if symbol is an index) """
+	if isinstance(symbol,gpy):
+		return symbols.vals if hasattr(self,'vals') else symbol.index
+	elif isinstance(symbol,(pd.Series,pd.DataFrame,pd.Index)):
+		return symbol
+	elif not is_iterable(symbol):
+		return symbol
 
 class SeriesDB:
 	""" Basically a wrapper that makes sure that iter works through self.database.values()"""
-	def __init__(self,database={}):
-		self.database = database
+	def __init__(self,database=None):
+		self.database = NoneInit(database,{})
 
 	def __iter__(self):
 		return iter(self.database.values())
@@ -59,8 +76,8 @@ class GpyDB:
 		else:
 			self.init_ws(ws)
 			self.g2np = gams2numpy.Gams2Numpy(self.ws.system_directory)
-			self.name = self.versionized_name(kw_df(kwargs,'name','rname'))
-			self.export_settings = {'dropattrs': ['database','ws','g2np'], 'data_folder': kw_df(kwargs,'data_folder',os.getcwd())}
+			self.name = self.versionized_name(dictInit('name','rname',kwargs))
+			self.export_settings = {'dropattrs': ['database','ws','g2np'], 'data_folder': dictInit('data_folder',os.getcwd(),kwargs)}
 			self.init_dbs(db)
 			self.series = SeriesDB(database=dict_from_GamsDatabase(self.database,self.g2np))
 		self.update_alias(alias=alias)
@@ -179,10 +196,10 @@ class GpyDB:
 	def gettypes(self,types):
 		return {symbol.name: symbol for symbol in self.series if symbol.type in types}
 
-	def copy(self,dropattrs=['database'],**kwargs):
+	def copy(self,dropattrs=None,**kwargs):
 		""" return copy of database. Ignore elements in dropattrs."""
 		db = GpyDB(**{**self.__dict__,**kwargs})
-		if 'series' not in dropattrs and 'series' not in kwargs.keys():
+		if 'series' not in NoneInit(dropattrs,['database']) and 'series' not in kwargs.keys():
 			db.series = self.series.copy()
 		return db
 
@@ -223,9 +240,9 @@ class GpyDB:
 		""" Returns list of sets a symbol x is defined over. If x is defined over a set and its alias, only the set is returned. """
 		return np.unique([self.alias(name) for name in self[x].index.names]).tolist()
 
-	def vardom(self,set_,types=['variable','parameter']):
+	def vardom(self,set_,types=None):
 		""" Returns a dict with keys = set_+aliases, values = list of symbols in 'types' defined over the the relevant set/alias"""
-		return {set_i: [k for k,v in self.gettypes(types).items() if set_i in v.domains] for set_i in self.alias_all(set_)}
+		return {set_i: [k for k,v in self.gettypes(NoneInit(types,['variable','parameter'])).items() if set_i in v.domains] for set_i in self.alias_all(set_)}
 
 	def merge_internal(self,merge=True):
 		gams_from_db_py(self.series,self.database,self.g2np,merge=merge)
