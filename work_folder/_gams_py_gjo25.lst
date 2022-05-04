@@ -1,0 +1,304 @@
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:20:27 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+   3  ;
+   4  OPTION SYSOUT=OFF, SOLPRINT=OFF, LIMROW=0, LIMCOL=0, DECIMALS=6;
+   5   
+   6   
+   7  # User defined functions:
+   8   
+   9  # ----------------------------------------------------------------------------------------------------
+  10  #  Define function: load_level
+  11  # ----------------------------------------------------------------------------------------------------
+  12   
+  13   
+  14  # ----------------------------------------------------------------------------------------------------
+  15  #  Define function: load_fixed
+  16  # ----------------------------------------------------------------------------------------------------
+  17   
+  18   
+  19  # ----------------------------------------------------------------------------------------------------
+  20  #  Define function: SolveEmptyNLP
+  21  # ----------------------------------------------------------------------------------------------------
+  22   
+  23   
+  24  sets
+  25          alias_set
+  26          alias_map2
+  27          n
+  28          s
+  29          t
+  30  ;
+  31   
+  32  alias(n,nn,nnn);
+  33   
+  34  sets
+  35          alias_[alias_set,alias_map2]
+  36          t0[t]
+  37          tE[t]
+  38          tx0[t]
+  39          txE[t]
+  40          map_FunkyTree[s,n,nn]
+  41          map_spinp_FunkyTree[s,n,nn]
+  42          map_spout_FunkyTree[s,n,nn]
+  43          knout_FunkyTree[s,n]
+  44          kninp_FunkyTree[s,n]
+  45          spout_FunkyTree[s,n]
+  46          spinp_FunkyTree[s,n]
+  47          input_FunkyTree[s,n]
+  48          output_FunkyTree[s,n]
+  49          int_FunkyTree[s,n]
+  50          map_FunkyTree_CET[s,n,nn]
+  51          knot_FunkyTree_CET[s,n]
+  52          branch_FunkyTree_CET[s,n]
+  53          branch_o_FunkyTree_CET[s,n]
+  54          branch_no_FunkyTree_CET[s,n]
+  55          map_FunkyTree_CES[s,n,nn]
+  56          knot_FunkyTree_CES[s,n]
+  57          branch_FunkyTree_CES[s,n]
+  58          knot_o_FunkyTree_CES[s,n]
+  59          knot_no_FunkyTree_CES[s,n]
+  60          branch2o_FunkyTree_CES[s,n]
+  61          branch2no_FunkyTree_CES[s,n]
+  62          exomu_FunkyTree[s,n,nn]
+  63          endo_qD_FunkyTree[s,n]
+  64          endo_qS_FunkyTree[s,n]
+  65          endo_pS_FunkyTree[s,n]
+  66  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_24.gdx
+--- LOAD  alias_set = 1:alias_set
+--- LOAD  alias_map2 = 2:alias_map2
+--- LOAD  n = 3:n
+--- LOAD  s = 4:s
+--- LOAD  t = 8:t
+--- LOAD  alias_ = 7:alias_
+--- LOAD  t0 = 9:t0
+--- LOAD  tE = 10:tE
+--- LOAD  tx0 = 11:tx0
+--- LOAD  txE = 12:txE
+--- LOAD  map_FunkyTree = 13:map_FunkyTree
+--- LOAD  map_spinp_FunkyTree = 14:map_spinp_FunkyTree
+--- LOAD  map_spout_FunkyTree = 15:map_spout_FunkyTree
+--- LOAD  knout_FunkyTree = 16:knout_FunkyTree
+--- LOAD  kninp_FunkyTree = 17:kninp_FunkyTree
+--- LOAD  spout_FunkyTree = 18:spout_FunkyTree
+--- LOAD  spinp_FunkyTree = 19:spinp_FunkyTree
+--- LOAD  input_FunkyTree = 20:input_FunkyTree
+--- LOAD  output_FunkyTree = 21:output_FunkyTree
+--- LOAD  int_FunkyTree = 22:int_FunkyTree
+--- LOAD  map_FunkyTree_CET = 23:map_FunkyTree_CET
+--- LOAD  knot_FunkyTree_CET = 24:knot_FunkyTree_CET
+--- LOAD  branch_FunkyTree_CET = 25:branch_FunkyTree_CET
+--- LOAD  branch_o_FunkyTree_CET = 26:branch_o_FunkyTree_CET
+--- LOAD  branch_no_FunkyTree_CET = 27:branch_no_FunkyTree_CET
+--- LOAD  map_FunkyTree_CES = 28:map_FunkyTree_CES
+--- LOAD  knot_FunkyTree_CES = 29:knot_FunkyTree_CES
+--- LOAD  branch_FunkyTree_CES = 30:branch_FunkyTree_CES
+--- LOAD  knot_o_FunkyTree_CES = 31:knot_o_FunkyTree_CES
+--- LOAD  knot_no_FunkyTree_CES = 32:knot_no_FunkyTree_CES
+--- LOAD  branch2o_FunkyTree_CES = 33:branch2o_FunkyTree_CES
+--- LOAD  branch2no_FunkyTree_CES = 34:branch2no_FunkyTree_CES
+--- LOAD  exomu_FunkyTree = 35:exomu_FunkyTree
+--- LOAD  endo_qD_FunkyTree = 36:endo_qD_FunkyTree
+--- LOAD  endo_qS_FunkyTree = 37:endo_qS_FunkyTree
+--- LOAD  endo_pS_FunkyTree = 38:endo_pS_FunkyTree
+ 107   
+ 108  parameters
+ 109          R_LR
+ 110          g_LR
+ 111          infl_LR
+ 112          qnorm_out[t,s,n]
+ 113          qnorm_inp[t,s,n]
+ 114  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_24.gdx
+--- LOAD  R_LR = 39:R_LR
+--- LOAD  g_LR = 40:g_LR
+--- LOAD  infl_LR = 41:infl_LR
+--- LOAD  qnorm_out = 42:qnorm_out
+--- LOAD  qnorm_inp = 43:qnorm_inp
+ 124   
+ 125  variables
+ 126          mu[s,n,nn]
+ 127          qD[t,s,n]
+ 128          eta[s,n]
+ 129          sigma[s,n]
+ 130          pS[t,s,n]
+ 131          pD[t,s,n]
+ 132          qS[t,s,n]
+ 133          qiv_out[t,s,n]
+ 134          qiv_inp[t,s,n]
+ 135  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_24.gdx
+--- LOAD  mu = 44:mu
+--- LOAD  qD = 45:qD
+--- LOAD  eta = 46:eta
+--- LOAD  sigma = 47:sigma
+--- LOAD  pS = 48:pS
+--- LOAD  pD = 49:pD
+--- LOAD  qS = 50:qS
+--- LOAD  qiv_out = 51:qiv_out
+--- LOAD  qiv_inp = 52:qiv_inp
+ 149   
+ 150   
+ 151   
+ 152   
+ 153  # --------------------------------------B_FunkyTree_FunkyTree_CET-------------------------------------
+ 154  #  Initialize B_FunkyTree_FunkyTree_CET equation block
+ 155  # ----------------------------------------------------------------------------------------------------
+ 156  EQUATION E_zp_FunkyTree_CET[t,s,n];
+ 157  E_zp_FunkyTree_CET[t,s,n]$(knot_funkytree_cet[s,n] and txe[t])..        pD[t,s,n]*qD[t,s,n]  =E=  sum(nn$(map_FunkyTree_CET[s,nn,n] and branch_o_FunkyTree_CET[s,nn]), qS[t,s,nn]*pS[t,s,nn])+sum(nn$(map_FunkyTree_CET[s,nn,n] and branch_no_FunkyTree_CET[s,nn]), qD[t,s,nn]*pD[t,s,nn]);
+ 158  EQUATION E_q_out_FunkyTree_CET[t,s,n];
+ 159  E_q_out_FunkyTree_CET[t,s,n]$(branch_o_funkytree_cet[s,n] and txe[t])..         qS[t,s,n]  =E=  sum(nn$(map_FunkyTree_CET[s,n,nn]), qD[t,s,nn]*mu[s,n,nn] * (pS[t,s,n]/pD[t,s,nn])**(eta[s,nn]) / (sum(nnn$(map_FunkyTree_CET[s,nnn,nn] and branch_o_FunkyTree_CET[s,nnn]), mu[s,nnn,nn] * (pD[t,s,nn]/pS[t,s,nnn])**(eta[s,nn]))+sum(nnn$(map_FunkyTree_CET[s,nnn,nn] and branch_no_FunkyTree_CET[s,nnn]), mu[s,nnn,nn] * (pD[t,s,nn]/pD[t,s,nnn])**(eta[s,nn]))));
+ 160  EQUATION E_q_nout_FunkyTree_CET[t,s,n];
+ 161  E_q_nout_FunkyTree_CET[t,s,n]$(branch_no_funkytree_cet[s,n] and txe[t])..               qD[t,s,n]  =E=  sum(nn$(map_FunkyTree_CET[s,n,nn]), qD[t,s,nn]*mu[s,n,nn] * (pD[t,s,n]/pD[t,s,nn])**(eta[s,nn]) / (sum(nnn$(map_FunkyTree_CET[s,nnn,nn] and branch_o_FunkyTree_CET[s,nnn]), mu[s,nnn,nn] * (pD[t,s,nn]/pS[t,s,nnn])**(eta[s,nn]))+sum(nnn$(map_FunkyTree_CET[s,nnn,nn] and branch_no_FunkyTree_CET[s,nnn]), mu[s,nnn,nn] * (pD[t,s,nn]/pD[t,s,nnn])**(eta[s,nn]))));
+ 162   
+ 163  # ----------------------------------------------------------------------------------------------------
+ 164  #  Define B_FunkyTree_FunkyTree_CET model
+ 165  # ----------------------------------------------------------------------------------------------------
+ 166  Model B_FunkyTree_FunkyTree_CET /
+ 167  E_zp_FunkyTree_CET, E_q_out_FunkyTree_CET, E_q_nout_FunkyTree_CET
+ 168  /;
+ 169   
+ 170   
+ 171   
+ 172   
+ 173  # --------------------------------------B_FunkyTree_FunkyTree_CES-------------------------------------
+ 174  #  Initialize B_FunkyTree_FunkyTree_CES equation block
+ 175  # ----------------------------------------------------------------------------------------------------
+ 176  EQUATION E_zp_out_FunkyTree_CES[t,s,n];
+ 177  E_zp_out_FunkyTree_CES[t,s,n]$(knot_o_funkytree_ces[s,n] and txe[t])..  pS[t,s,n]*qS[t,s,n]  =E=  sum(nn$(map_FunkyTree_CES[s,n,nn]), qD[t,s,nn]*pD[t,s,nn]);
+ 178  EQUATION E_zp_nout_FunkyTree_CES[t,s,n];
+ 179  E_zp_nout_FunkyTree_CES[t,s,n]$(knot_no_funkytree_ces[s,n] and txe[t])..        pD[t,s,n]*qD[t,s,n]  =E=  sum(nn$(map_FunkyTree_CES[s,n,nn]), qD[t,s,nn]*pD[t,s,nn]);
+ 180  EQUATION E_q_out_FunkyTree_CES[t,s,n];
+ 181  E_q_out_FunkyTree_CES[t,s,n]$(branch2o_funkytree_ces[s,n] and txe[t])..         qD[t,s,n]  =E=  sum(nn$(map_FunkyTree_CES[s,nn,n]), qS[t,s,nn]*mu[s,nn,n] * (pS[t,s,nn]/pD[t,s,n])**(sigma[s,nn]) / sum(nnn$(map_FunkyTree_CES[s,nn,nnn]), mu[s,nn,nnn] * (pS[t,s,nn]/pD[t,s,nnn])**(sigma[s,nn])));
+ 182  EQUATION E_q_nout_FunkyTree_CES[t,s,n];
+ 183  E_q_nout_FunkyTree_CES[t,s,n]$(branch2no_funkytree_ces[s,n] and txe[t])..               qD[t,s,n]  =E=  sum(nn$(map_FunkyTree_CES[s,nn,n]), qD[t,s,nn]*mu[s,nn,n] * (pD[t,s,nn]/pD[t,s,n])**(sigma[s,nn]) / sum(nnn$(map_FunkyTree_CES[s,nn,nnn]), mu[s,nn,nnn] * (pD[t,s,nn]/pD[t,s,nnn])**(sigma[s,nn])));
+ 184   
+ 185  # ----------------------------------------------------------------------------------------------------
+ 186  #  Define B_FunkyTree_FunkyTree_CES model
+ 187  # ----------------------------------------------------------------------------------------------------
+ 188  Model B_FunkyTree_FunkyTree_CES /
+ 189  E_zp_out_FunkyTree_CES, E_zp_nout_FunkyTree_CES, E_q_out_FunkyTree_CES, E_q_nout_FunkyTree_CES
+ 190  /;
+ 191   
+ 192   
+ 193  qS.fx[t,s,n]$((output_FunkyTree[s,n] and ( not ((endo_qS_FunkyTree[s,n] and t0[t]))))) = qS.l[t,s,n];
+ 194  pD.fx[t,s,n]$(input_FunkyTree[s,n]) = pD.l[t,s,n];
+ 195  sigma.fx[s,n]$(kninp_FunkyTree[s,n]) = sigma.l[s,n];
+ 196  eta.fx[s,n]$(knout_FunkyTree[s,n]) = eta.l[s,n];
+ 197  mu.fx[s,n,nn]$(exomu_FunkyTree[s,n,nn]) = mu.l[s,n,nn];
+ 198  qD.fx[t,s,n]$((((int_FunkyTree[s,n] or input_FunkyTree[s,n]) and t0[t]) and ( not ((endo_qD_FunkyTree[s,n] and t0[t]))))) = qD.l[t,s,n];
+ 199  pS.fx[t,s,n]$(((output_FunkyTree[s,n] and t0[t]) and ( not ((endo_pS_FunkyTree[s,n] and t0[t]))))) = pS.l[t,s,n];
+ 200  pD.lo[t,s,n]$(int_FunkyTree[s,n]) = -inf;
+ 201  pD.up[t,s,n]$(int_FunkyTree[s,n]) = inf;
+ 202  pS.lo[t,s,n]$(((output_FunkyTree[s,n] and tx0[t]) or (endo_pS_FunkyTree[s,n] and t0[t]))) = -inf;
+ 203  pS.up[t,s,n]$(((output_FunkyTree[s,n] and tx0[t]) or (endo_pS_FunkyTree[s,n] and t0[t]))) = inf;
+ 204  qD.lo[t,s,n]$((((int_FunkyTree[s,n] or input_FunkyTree[s,n]) and tx0[t]) or (endo_qD_FunkyTree[s,n] and t0[t]))) = -inf;
+ 205  qD.up[t,s,n]$((((int_FunkyTree[s,n] or input_FunkyTree[s,n]) and tx0[t]) or (endo_qD_FunkyTree[s,n] and t0[t]))) = inf;
+ 206  qiv_inp.lo[t,s,n]$(spinp_FunkyTree[s,n]) = -inf;
+ 207  qiv_inp.up[t,s,n]$(spinp_FunkyTree[s,n]) = inf;
+ 208  qiv_out.lo[t,s,n]$(spout_FunkyTree[s,n]) = -inf;
+ 209  qiv_out.up[t,s,n]$(spout_FunkyTree[s,n]) = inf;
+ 210  mu.lo[s,n,nn]$(( not (exomu_FunkyTree[s,n,nn]))) = -inf;
+ 211  mu.up[s,n,nn]$(( not (exomu_FunkyTree[s,n,nn]))) = inf;
+ 212  qS.lo[t,s,n]$((endo_qS_FunkyTree[s,n] and t0[t])) = -inf;
+ 213  qS.up[t,s,n]$((endo_qS_FunkyTree[s,n] and t0[t])) = inf;
+ 214   
+ 215  # ----------------------------------------------------------------------------------------------------
+ 216  #  Define FunkyTree_C model
+ 217  # ----------------------------------------------------------------------------------------------------
+ 218  Model FunkyTree_C /
+ 219  E_zp_FunkyTree_CET, E_q_out_FunkyTree_CET, E_q_nout_FunkyTree_CET, E_zp_out_FunkyTree_CES, E_zp_nout_FunkyTree_CES, E_q_out_FunkyTree_CES, E_q_nout_FunkyTree_CES
+ 220  /;
+ 221   
+ 222   
+ 223  solve FunkyTree_C using CNS;
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:20:27 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Include File Summary
+
+
+   SEQ   GLOBAL TYPE      PARENT   LOCAL  FILENAME
+
+     1        1 INPUT          0       0  C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\_gams_py_gjo25.gms
+     2       67 GDXIN          1      67  C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_24.gdx
+     3      115 GDXIN          1     115  C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_24.gdx
+     4      136 GDXIN          1     136  C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_24.gdx
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  38.1.0 a1a3b545 WEX-WEI
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:20:27 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE FunkyTree_C Using CNS From line 223
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           7     SINGLE EQUATIONS            9
+BLOCKS OF VARIABLES           7     SINGLE VARIABLES           23
+NON ZERO ELEMENTS            66     NON LINEAR N-Z             60
+CODE LENGTH                 181     CONSTANT POOL              16
+SINGLE =E|X= EQUS             9     SINGLE UNFIXED VARS         9
+
+
+GENERATION TIME      =        0.015 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:20:27 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE FunkyTree_C Using CNS From line 223
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   FunkyTree_C         
+     TYPE    CNS                 
+     SOLVER  CONOPT4             FROM LINE  223
+
+**** SOLVER STATUS     1 Normal Completion
+**** MODEL STATUS      16 Solved
+
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
+ ITERATION COUNT, LIMIT         1    2147483647
+ EVALUATION ERRORS              0             0
+ 
+ 
+    C O N O P T   version 4.25
+    Copyright (C) ARKI Consulting and Development A/S
+                  Bagsvaerdvej 246 A
+                  DK-2880 Bagsvaerd, Denmark
+ 
+ 
+    The user model has 9 constraints and 23 variables
+    with 66 Jacobian elements, 60 of which are nonlinear.
+ 
+    The pre-triangular part of the model has 0 constraints and 14 variables.
+ 
+    Preprocessed model has 9 constraints and 9 variables
+    with 29 Jacobian elements, 25 of which are nonlinear.
+ 
+ ** Feasible solution to a square system.
+ 
+ 
+ CONOPT time Total                            0.001 seconds
+   of which: Function evaluations             0.000 =  0.0%
+             1st Derivative evaluations       0.000 =  0.0%
+ 
+
+
+**** REPORT SUMMARY :        0 INFEASIBLE
+                             0  DEPENDENT
+                             0     ERRORS
+
+
+EXECUTION TIME       =        0.140 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
+
+
+USER: Large MUD - 20 User License                    G211207|0002CA-WIN
+      DREAM, Danish Rational Economic Agents Model                DC620
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\_gams_py_gjo25.gms
+Output     C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\_gams_py_gjo25.lst

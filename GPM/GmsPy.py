@@ -93,7 +93,7 @@ class GmsSettings:
 		if db[var].type == 'scalar_variable':
 			return db[var] if var in g.conditions else None
 		else:
-			return rc_AdjGpy(db[var],c=g.conditions[var]) if var in g.conditions else None
+			return rc_AdjGpy(db[var],c=g.conditions[var],pm=True) if var in g.conditions else None
 	def db_ss(self,g,db=None):
 		""" g ∈ {'g_exo','g_endo'} """
 		g = self.metagroup(g,db=db)
@@ -194,3 +194,8 @@ class GmsModel:
 		if exportdb:
 			db.database.export(db_str)
 		self.addlocal(db.name, db_str)
+
+	def SolveLoopFromCP(self, settings, dbT, cp, name = 'shock', db0 = None, subsetDB = True, extractSol = None, loop = 'l1', solve = None, model = None, **kwargs):
+		solvetext, shock_db =  GmsWrite(settings, dbT, name = name, db0 = db0, subsetDB=subsetDB, extractSol = extractSol, loop = loop, solve = solve, model = model, **kwargs)
+		self.addDB(shock_db)
+		self.run(run = solvetext, options_add = {'checkpoint': cp})

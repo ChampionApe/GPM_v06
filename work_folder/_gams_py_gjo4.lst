@@ -1,0 +1,260 @@
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:19:59 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+   3  ;
+   4  OPTION SYSOUT=OFF, SOLPRINT=OFF, LIMROW=0, LIMCOL=0, DECIMALS=6;
+   5   
+   6   
+   7  # User defined functions:
+   8   
+   9  # ----------------------------------------------------------------------------------------------------
+  10  #  Define function: load_level
+  11  # ----------------------------------------------------------------------------------------------------
+  12   
+  13   
+  14  # ----------------------------------------------------------------------------------------------------
+  15  #  Define function: load_fixed
+  16  # ----------------------------------------------------------------------------------------------------
+  17   
+  18   
+  19  # ----------------------------------------------------------------------------------------------------
+  20  #  Define function: SolveEmptyNLP
+  21  # ----------------------------------------------------------------------------------------------------
+  22   
+  23   
+  24  sets
+  25          alias_set
+  26          alias_map2
+  27          n
+  28          s
+  29  ;
+  30   
+  31  alias(n,nn,nnn);
+  32   
+  33  sets
+  34          alias_[alias_set,alias_map2]
+  35          t[t]
+  36          t0[t]
+  37          tE[t]
+  38          tx0[t]
+  39          txE[t]
+  40          map_CET1[s,n,nn]
+  41          map_spinp_CET1[s,n,nn]
+  42          map_spout_CET1[s,n,nn]
+  43          knout_CET1[s,n]
+  44          kninp_CET1[s,n]
+  45          spout_CET1[s,n]
+  46          spinp_CET1[s,n]
+  47          input_CET1[s,n]
+  48          output_CET1[s,n]
+  49          int_CET1[s,n]
+  50          knot_CET1[s,n]
+  51          branch_CET1[s,n]
+  52          branch_o_CET1[s,n]
+  53          branch_no_CET1[s,n]
+  54          exomu_CET1[s,n,nn]
+  55          endo_qD_CET1[s,n]
+  56          endo_qS_CET1[s,n]
+  57          endo_pS_CET1[s,n]
+  58  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_3.gdx
+--- LOAD  alias_set = 2:alias_set
+--- LOAD  alias_map2 = 3:alias_map2
+--- LOAD  n = 12:n
+--- LOAD  s = 13:s
+--- LOAD  alias_ = 1:alias_
+--- LOAD  t = 4:t
+--- LOAD  t0 = 5:t0
+--- LOAD  tE = 6:tE
+--- LOAD  tx0 = 7:tx0
+--- LOAD  txE = 8:txE
+--- LOAD  map_CET1 = 14:map_CET1
+--- LOAD  map_spinp_CET1 = 15:map_spinp_CET1
+--- LOAD  map_spout_CET1 = 16:map_spout_CET1
+--- LOAD  knout_CET1 = 17:knout_CET1
+--- LOAD  kninp_CET1 = 18:kninp_CET1
+--- LOAD  spout_CET1 = 19:spout_CET1
+--- LOAD  spinp_CET1 = 20:spinp_CET1
+--- LOAD  input_CET1 = 21:input_CET1
+--- LOAD  output_CET1 = 22:output_CET1
+--- LOAD  int_CET1 = 23:int_CET1
+--- LOAD  knot_CET1 = 26:knot_CET1
+--- LOAD  branch_CET1 = 27:branch_CET1
+--- LOAD  branch_o_CET1 = 28:branch_o_CET1
+--- LOAD  branch_no_CET1 = 29:branch_no_CET1
+--- LOAD  exomu_CET1 = 30:exomu_CET1
+--- LOAD  endo_qD_CET1 = 31:endo_qD_CET1
+--- LOAD  endo_qS_CET1 = 32:endo_qS_CET1
+--- LOAD  endo_pS_CET1 = 33:endo_pS_CET1
+  91   
+  92  parameters
+  93          R_LR
+  94          g_LR
+  95          infl_LR
+  96          qnorm_out[t,s,n]
+  97          qnorm_inp[t,s,n]
+  98  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_3.gdx
+--- LOAD  R_LR = 9:R_LR
+--- LOAD  g_LR = 10:g_LR
+--- LOAD  infl_LR = 11:infl_LR
+--- LOAD  qnorm_out = 39:qnorm_out
+--- LOAD  qnorm_inp = 40:qnorm_inp
+ 108   
+ 109  variables
+ 110          mu[s,n,nn]
+ 111          eta[s,n]
+ 112          pS[t,s,n]
+ 113          pD[t,s,n]
+ 114          qS[t,s,n]
+ 115          qD[t,s,n]
+ 116          sigma[s,n]
+ 117          qiv_out[t,s,n]
+ 118          qiv_inp[t,s,n]
+ 119  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_3.gdx
+--- LOAD  mu = 24:mu
+--- LOAD  eta = 25:eta
+--- LOAD  pS = 34:pS
+--- LOAD  pD = 35:pD
+--- LOAD  qS = 36:qS
+--- LOAD  qD = 37:qD
+--- LOAD  sigma = 38:sigma
+--- LOAD  qiv_out = 41:qiv_out
+--- LOAD  qiv_inp = 42:qiv_inp
+ 133   
+ 134   
+ 135   
+ 136   
+ 137  # ---------------------------------------------B_CET1_CET1--------------------------------------------
+ 138  #  Initialize B_CET1_CET1 equation block
+ 139  # ----------------------------------------------------------------------------------------------------
+ 140  EQUATION E_zp_CET1[t,s,n];
+ 141  E_zp_CET1[t,s,n]$(knot_cet1[s,n] and txe[t])..  pD[t,s,n]*qD[t,s,n]  =E=  sum(nn$(map_CET1[s,nn,n] and branch_o_CET1[s,nn]), qS[t,s,nn]*pS[t,s,nn])+sum(nn$(map_CET1[s,nn,n] and branch_no_CET1[s,nn]), qD[t,s,nn]*pD[t,s,nn]);
+ 142  EQUATION E_demand_out_CET1[t,s,n];
+ 143  E_demand_out_CET1[t,s,n]$(branch_o_cet1[s,n] and txe[t])..              qS[t,s,n]  =E=  sum(nn$(map_CET1[s,n,nn]), mu[s,n,nn] * (pS[t,s,n]/pD[t,s,nn])**(eta[s,nn]) * qD[t,s,nn]);
+ 144  EQUATION E_demand_nout_CET1[t,s,n];
+ 145  E_demand_nout_CET1[t,s,n]$(branch_no_cet1[s,n] and txe[t])..    qD[t,s,n]  =E=  sum(nn$(map_CET1[s,n,nn]), mu[s,n,nn] * (pD[t,s,n]/pD[t,s,nn])**(eta[s,nn]) * qD[t,s,nn]);
+ 146   
+ 147  # ----------------------------------------------------------------------------------------------------
+ 148  #  Define B_CET1_CET1 model
+ 149  # ----------------------------------------------------------------------------------------------------
+ 150  Model B_CET1_CET1 /
+ 151  E_zp_CET1, E_demand_out_CET1, E_demand_nout_CET1
+ 152  /;
+ 153   
+ 154   
+ 155  qS.fx[t,s,n]$(((output_CET1[s,n] and ( not ((endo_qS_CET1[s,n] and t0[t])))) or (endo_qS_CET1[s,n] and t0[t]))) = qS.l[t,s,n];
+ 156  pD.fx[t,s,n]$(input_CET1[s,n]) = pD.l[t,s,n];
+ 157  sigma.fx[s,n]$(kninp_CET1[s,n]) = sigma.l[s,n];
+ 158  eta.fx[s,n]$(knout_CET1[s,n]) = eta.l[s,n];
+ 159  mu.fx[s,n,nn]$((exomu_CET1[s,n,nn] or ( not (exomu_CET1[s,n,nn])))) = mu.l[s,n,nn];
+ 160  pD.lo[t,s,n]$(int_CET1[s,n]) = -inf;
+ 161  pD.up[t,s,n]$(int_CET1[s,n]) = inf;
+ 162  pS.lo[t,s,n]$((((output_CET1[s,n] and tx0[t]) or (endo_pS_CET1[s,n] and t0[t])) or ((output_CET1[s,n] and t0[t]) and ( not ((endo_pS_CET1[s,n] and t0[t])))))) = -inf;
+ 163  pS.up[t,s,n]$((((output_CET1[s,n] and tx0[t]) or (endo_pS_CET1[s,n] and t0[t])) or ((output_CET1[s,n] and t0[t]) and ( not ((endo_pS_CET1[s,n] and t0[t])))))) = inf;
+ 164  qD.lo[t,s,n]$(((((int_CET1[s,n] or input_CET1[s,n]) and tx0[t]) or (endo_qD_CET1[s,n] and t0[t])) or (((int_CET1[s,n] or input_CET1[s,n]) and t0[t]) and ( not ((endo_qD_CET1[s,n] and t0[t])))))) = -inf;
+ 165  qD.up[t,s,n]$(((((int_CET1[s,n] or input_CET1[s,n]) and tx0[t]) or (endo_qD_CET1[s,n] and t0[t])) or (((int_CET1[s,n] or input_CET1[s,n]) and t0[t]) and ( not ((endo_qD_CET1[s,n] and t0[t])))))) = inf;
+ 166  qiv_inp.lo[t,s,n]$(spinp_CET1[s,n]) = -inf;
+ 167  qiv_inp.up[t,s,n]$(spinp_CET1[s,n]) = inf;
+ 168  qiv_out.lo[t,s,n]$(spout_CET1[s,n]) = -inf;
+ 169  qiv_out.up[t,s,n]$(spout_CET1[s,n]) = inf;
+ 170   
+ 171  # ----------------------------------------------------------------------------------------------------
+ 172  #  Define CET1_B model
+ 173  # ----------------------------------------------------------------------------------------------------
+ 174  Model CET1_B /
+ 175  E_zp_CET1, E_demand_out_CET1, E_demand_nout_CET1
+ 176  /;
+ 177   
+ 178   
+ 179  solve CET1_B using CNS;
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:19:59 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Include File Summary
+
+
+   SEQ   GLOBAL TYPE      PARENT   LOCAL  FILENAME
+
+     1        1 INPUT          0       0  C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\_gams_py_gjo4.gms
+     2       59 GDXIN          1      59  C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_3.gdx
+     3       99 GDXIN          1      99  C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_3.gdx
+     4      120 GDXIN          1     120  C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_3.gdx
+
+
+COMPILATION TIME     =        0.031 SECONDS      3 MB  38.1.0 a1a3b545 WEX-WEI
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:19:59 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE CET1_B Using CNS From line 179
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           3     SINGLE EQUATIONS            3
+BLOCKS OF VARIABLES           6     SINGLE VARIABLES            9
+NON ZERO ELEMENTS            18     NON LINEAR N-Z             16
+CODE LENGTH                  31     CONSTANT POOL              16
+SINGLE =E|X= EQUS             3     SINGLE UNFIXED VARS         3
+
+
+GENERATION TIME      =        0.016 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:19:59 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE CET1_B Using CNS From line 179
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   CET1_B              
+     TYPE    CNS                 
+     SOLVER  CONOPT4             FROM LINE  179
+
+**** SOLVER STATUS     1 Normal Completion
+**** MODEL STATUS      16 Solved
+
+ RESOURCE USAGE, LIMIT          0.031 10000000000.000
+ ITERATION COUNT, LIMIT         1    2147483647
+ EVALUATION ERRORS              0             0
+ 
+ 
+    C O N O P T   version 4.25
+    Copyright (C) ARKI Consulting and Development A/S
+                  Bagsvaerdvej 246 A
+                  DK-2880 Bagsvaerd, Denmark
+ 
+ 
+    The user model has 3 constraints and 9 variables
+    with 18 Jacobian elements, 16 of which are nonlinear.
+ 
+    The pre-triangular part of the model has 0 constraints and 6 variables.
+ 
+    Preprocessed model has 3 constraints and 3 variables
+    with 7 Jacobian elements, 7 of which are nonlinear.
+ 
+ ** Feasible solution to a square system.
+ 
+ 
+ CONOPT time Total                            0.006 seconds
+   of which: Function evaluations             0.000 =  0.0%
+             1st Derivative evaluations       0.001 = 16.7%
+ 
+
+
+**** REPORT SUMMARY :        0 INFEASIBLE
+                             0  DEPENDENT
+                             0     ERRORS
+
+
+EXECUTION TIME       =        0.297 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
+
+
+USER: Large MUD - 20 User License                    G211207|0002CA-WIN
+      DREAM, Danish Rational Economic Agents Model                DC620
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\_gams_py_gjo4.gms
+Output     C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\_gams_py_gjo4.lst

@@ -9,13 +9,13 @@ def tryint(x):
     except ValueError:
         return x
 
-def rc_AdjGpy(s, c = None, alias = None, lag = None, pm = False, **kwargs):
-	if c:
+def rc_AdjGpy(s, c = None, alias = None, lag = None, pm = True, **kwargs):
+	if c is None:
+		return AdjGpy(s,alias=alias, lag = lag)
+	else:
 		copy = s.copy()
 		copy.vals = rc_pd(s=s,c=c,alias=alias,lag=lag,pm=pm)
 		return copy
-	else:
-		return AdjGpy(s,alias=alias, lag = lag)
 
 def AdjGpy(symbol, alias = None, lag = None):
 	copy = symbol.copy()

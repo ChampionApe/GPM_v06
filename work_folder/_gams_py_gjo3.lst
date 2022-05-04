@@ -1,0 +1,268 @@
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:19:58 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+   3  ;
+   4  OPTION SYSOUT=OFF, SOLPRINT=OFF, LIMROW=0, LIMCOL=0, DECIMALS=6;
+   5   
+   6   
+   7  # User defined functions:
+   8   
+   9  # ----------------------------------------------------------------------------------------------------
+  10  #  Define function: load_level
+  11  # ----------------------------------------------------------------------------------------------------
+  12   
+  13   
+  14  # ----------------------------------------------------------------------------------------------------
+  15  #  Define function: load_fixed
+  16  # ----------------------------------------------------------------------------------------------------
+  17   
+  18   
+  19  # ----------------------------------------------------------------------------------------------------
+  20  #  Define function: SolveEmptyNLP
+  21  # ----------------------------------------------------------------------------------------------------
+  22   
+  23   
+  24  sets
+  25          alias_set
+  26          alias_map2
+  27          n
+  28          s
+  29  ;
+  30   
+  31  alias(n,nn,nnn);
+  32   
+  33  sets
+  34          alias_[alias_set,alias_map2]
+  35          t[t]
+  36          t0[t]
+  37          tE[t]
+  38          tx0[t]
+  39          txE[t]
+  40          map_CES2_norm[s,n,nn]
+  41          map_spinp_CES2_norm[s,n,nn]
+  42          map_spout_CES2_norm[s,n,nn]
+  43          knout_CES2_norm[s,n]
+  44          kninp_CES2_norm[s,n]
+  45          spout_CES2_norm[s,n]
+  46          spinp_CES2_norm[s,n]
+  47          input_CES2_norm[s,n]
+  48          output_CES2_norm[s,n]
+  49          int_CES2_norm[s,n]
+  50          map_CES2[s,n,nn]
+  51          knot_CES2[s,n]
+  52          branch_CES2[s,n]
+  53          knot_o_CES2[s,n]
+  54          knot_no_CES2[s,n]
+  55          branch2o_CES2[s,n]
+  56          branch2no_CES2[s,n]
+  57          exomu_CES2_norm[s,n,nn]
+  58          endo_qD_CES2_norm[s,n]
+  59          endo_qS_CES2_norm[s,n]
+  60          endo_pS_CES2_norm[s,n]
+  61  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_2.gdx
+--- LOAD  alias_set = 2:alias_set
+--- LOAD  alias_map2 = 3:alias_map2
+--- LOAD  n = 12:n
+--- LOAD  s = 13:s
+--- LOAD  alias_ = 1:alias_
+--- LOAD  t = 4:t
+--- LOAD  t0 = 5:t0
+--- LOAD  tE = 6:tE
+--- LOAD  tx0 = 7:tx0
+--- LOAD  txE = 8:txE
+--- LOAD  map_CES2_norm = 14:map_CES2_norm
+--- LOAD  map_spinp_CES2_norm = 15:map_spinp_CES2_norm
+--- LOAD  map_spout_CES2_norm = 16:map_spout_CES2_norm
+--- LOAD  knout_CES2_norm = 17:knout_CES2_norm
+--- LOAD  kninp_CES2_norm = 18:kninp_CES2_norm
+--- LOAD  spout_CES2_norm = 19:spout_CES2_norm
+--- LOAD  spinp_CES2_norm = 20:spinp_CES2_norm
+--- LOAD  input_CES2_norm = 21:input_CES2_norm
+--- LOAD  output_CES2_norm = 22:output_CES2_norm
+--- LOAD  int_CES2_norm = 23:int_CES2_norm
+--- LOAD  map_CES2 = 26:map_CES2
+--- LOAD  knot_CES2 = 27:knot_CES2
+--- LOAD  branch_CES2 = 28:branch_CES2
+--- LOAD  knot_o_CES2 = 29:knot_o_CES2
+--- LOAD  knot_no_CES2 = 30:knot_no_CES2
+--- LOAD  branch2o_CES2 = 31:branch2o_CES2
+--- LOAD  branch2no_CES2 = 32:branch2no_CES2
+--- LOAD  exomu_CES2_norm = 33:exomu_CES2_norm
+--- LOAD  endo_qD_CES2_norm = 34:endo_qD_CES2_norm
+--- LOAD  endo_qS_CES2_norm = 35:endo_qS_CES2_norm
+--- LOAD  endo_pS_CES2_norm = 36:endo_pS_CES2_norm
+  97   
+  98  parameters
+  99          R_LR
+ 100          g_LR
+ 101          infl_LR
+ 102          qnorm_out[t,s,n]
+ 103          qnorm_inp[t,s,n]
+ 104  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_2.gdx
+--- LOAD  R_LR = 9:R_LR
+--- LOAD  g_LR = 10:g_LR
+--- LOAD  infl_LR = 11:infl_LR
+--- LOAD  qnorm_out = 42:qnorm_out
+--- LOAD  qnorm_inp = 43:qnorm_inp
+ 114   
+ 115  variables
+ 116          mu[s,n,nn]
+ 117          sigma[s,n]
+ 118          pS[t,s,n]
+ 119          pD[t,s,n]
+ 120          qS[t,s,n]
+ 121          qD[t,s,n]
+ 122          eta[s,n]
+ 123          qiv_out[t,s,n]
+ 124          qiv_inp[t,s,n]
+ 125  ;
+GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_2.gdx
+--- LOAD  mu = 24:mu
+--- LOAD  sigma = 25:sigma
+--- LOAD  pS = 37:pS
+--- LOAD  pD = 38:pD
+--- LOAD  qS = 39:qS
+--- LOAD  qD = 40:qD
+--- LOAD  eta = 41:eta
+--- LOAD  qiv_out = 44:qiv_out
+--- LOAD  qiv_inp = 45:qiv_inp
+ 139   
+ 140   
+ 141   
+ 142   
+ 143  # ------------------------------------------B_CES2_norm_CES2------------------------------------------
+ 144  #  Initialize B_CES2_norm_CES2 equation block
+ 145  # ----------------------------------------------------------------------------------------------------
+ 146  EQUATION E_zp_out_CES2[t,s,n];
+ 147  E_zp_out_CES2[t,s,n]$(knot_o_ces2[s,n] and txe[t])..    pS[t,s,n]*qS[t,s,n]  =E=  sum(nn$(map_CES2[s,n,nn]), qD[t,s,nn]*pD[t,s,nn]);
+ 148  EQUATION E_zp_nout_CES2[t,s,n];
+ 149  E_zp_nout_CES2[t,s,n]$(knot_no_ces2[s,n] and txe[t])..  pD[t,s,n]*qD[t,s,n]  =E=  sum(nn$(map_CES2[s,n,nn]), qD[t,s,nn]*pD[t,s,nn]);
+ 150  EQUATION E_q_out_CES2[t,s,n];
+ 151  E_q_out_CES2[t,s,n]$(branch2o_ces2[s,n] and txe[t])..   qD[t,s,n]  =E=  sum(nn$(map_CES2[s,nn,n]), qS[t,s,nn]*mu[s,nn,n] * (pS[t,s,nn]/pD[t,s,n])**(sigma[s,nn]) / sum(nnn$(map_CES2[s,nn,nnn]), mu[s,nn,nnn] * (pS[t,s,nn]/pD[t,s,nnn])**(sigma[s,nn])));
+ 152  EQUATION E_q_nout_CES2[t,s,n];
+ 153  E_q_nout_CES2[t,s,n]$(branch2no_ces2[s,n] and txe[t])..                 qD[t,s,n]  =E=  sum(nn$(map_CES2[s,nn,n]), qD[t,s,nn]*mu[s,nn,n] * (pD[t,s,nn]/pD[t,s,n])**(sigma[s,nn]) / sum(nnn$(map_CES2[s,nn,nnn]), mu[s,nn,nnn] * (pD[t,s,nn]/pD[t,s,nnn])**(sigma[s,nn])));
+ 154   
+ 155  # ----------------------------------------------------------------------------------------------------
+ 156  #  Define B_CES2_norm_CES2 model
+ 157  # ----------------------------------------------------------------------------------------------------
+ 158  Model B_CES2_norm_CES2 /
+ 159  E_zp_out_CES2, E_zp_nout_CES2, E_q_out_CES2, E_q_nout_CES2
+ 160  /;
+ 161   
+ 162   
+ 163  qS.fx[t,s,n]$(((output_CES2_norm[s,n] and ( not ((endo_qS_CES2_norm[s,n] and t0[t])))) or (endo_qS_CES2_norm[s,n] and t0[t]))) = qS.l[t,s,n];
+ 164  pD.fx[t,s,n]$(input_CES2_norm[s,n]) = pD.l[t,s,n];
+ 165  sigma.fx[s,n]$(kninp_CES2_norm[s,n]) = sigma.l[s,n];
+ 166  eta.fx[s,n]$(knout_CES2_norm[s,n]) = eta.l[s,n];
+ 167  mu.fx[s,n,nn]$((exomu_CES2_norm[s,n,nn] or ( not (exomu_CES2_norm[s,n,nn])))) = mu.l[s,n,nn];
+ 168  pD.lo[t,s,n]$(int_CES2_norm[s,n]) = -inf;
+ 169  pD.up[t,s,n]$(int_CES2_norm[s,n]) = inf;
+ 170  pS.lo[t,s,n]$((((output_CES2_norm[s,n] and tx0[t]) or (endo_pS_CES2_norm[s,n] and t0[t])) or ((output_CES2_norm[s,n] and t0[t]) and ( not ((endo_pS_CES2_norm[s,n] and t0[t])))))) = -inf;
+ 171  pS.up[t,s,n]$((((output_CES2_norm[s,n] and tx0[t]) or (endo_pS_CES2_norm[s,n] and t0[t])) or ((output_CES2_norm[s,n] and t0[t]) and ( not ((endo_pS_CES2_norm[s,n] and t0[t])))))) = inf;
+ 172  qD.lo[t,s,n]$(((((int_CES2_norm[s,n] or input_CES2_norm[s,n]) and tx0[t]) or (endo_qD_CES2_norm[s,n] and t0[t])) or (((int_CES2_norm[s,n] or input_CES2_norm[s,n]) and t0[t]) and ( not ((endo_qD_CES2_norm[s,n] and t0[t])))))) = -inf;
+ 173  qD.up[t,s,n]$(((((int_CES2_norm[s,n] or input_CES2_norm[s,n]) and tx0[t]) or (endo_qD_CES2_norm[s,n] and t0[t])) or (((int_CES2_norm[s,n] or input_CES2_norm[s,n]) and t0[t]) and ( not ((endo_qD_CES2_norm[s,n] and t0[t])))))) = inf;
+ 174  qiv_inp.lo[t,s,n]$(spinp_CES2_norm[s,n]) = -inf;
+ 175  qiv_inp.up[t,s,n]$(spinp_CES2_norm[s,n]) = inf;
+ 176  qiv_out.lo[t,s,n]$(spout_CES2_norm[s,n]) = -inf;
+ 177  qiv_out.up[t,s,n]$(spout_CES2_norm[s,n]) = inf;
+ 178   
+ 179  # ----------------------------------------------------------------------------------------------------
+ 180  #  Define CES2_norm_B model
+ 181  # ----------------------------------------------------------------------------------------------------
+ 182  Model CES2_norm_B /
+ 183  E_zp_out_CES2, E_zp_nout_CES2, E_q_out_CES2, E_q_nout_CES2
+ 184  /;
+ 185   
+ 186   
+ 187  solve CES2_norm_B using CNS;
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:19:58 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Include File Summary
+
+
+   SEQ   GLOBAL TYPE      PARENT   LOCAL  FILENAME
+
+     1        1 INPUT          0       0  C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\_gams_py_gjo3.gms
+     2       62 GDXIN          1      62  C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_2.gdx
+     3      105 GDXIN          1     105  C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_2.gdx
+     4      126 GDXIN          1     126  C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_2.gdx
+
+
+COMPILATION TIME     =        0.016 SECONDS      3 MB  38.1.0 a1a3b545 WEX-WEI
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:19:58 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE CES2_norm_B Using CNS From line 187
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           4     SINGLE EQUATIONS            6
+BLOCKS OF VARIABLES           6     SINGLE VARIABLES           16
+NON ZERO ELEMENTS            44     NON LINEAR N-Z             40
+CODE LENGTH                 121     CONSTANT POOL              16
+SINGLE =E|X= EQUS             6     SINGLE UNFIXED VARS         6
+
+
+GENERATION TIME      =        0.015 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:19:58 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE CES2_norm_B Using CNS From line 187
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   CES2_norm_B         
+     TYPE    CNS                 
+     SOLVER  CONOPT4             FROM LINE  187
+
+**** SOLVER STATUS     1 Normal Completion
+**** MODEL STATUS      16 Solved
+
+ RESOURCE USAGE, LIMIT          0.016 10000000000.000
+ ITERATION COUNT, LIMIT         1    2147483647
+ EVALUATION ERRORS              0             0
+ 
+ 
+    C O N O P T   version 4.25
+    Copyright (C) ARKI Consulting and Development A/S
+                  Bagsvaerdvej 246 A
+                  DK-2880 Bagsvaerd, Denmark
+ 
+ 
+    The user model has 6 constraints and 16 variables
+    with 44 Jacobian elements, 40 of which are nonlinear.
+ 
+    The pre-triangular part of the model has 0 constraints and 10 variables.
+ 
+    Preprocessed model has 6 constraints and 6 variables
+    with 20 Jacobian elements, 16 of which are nonlinear.
+ 
+ ** Feasible solution to a square system.
+ 
+ 
+ CONOPT time Total                            0.002 seconds
+   of which: Function evaluations             0.000 =  0.0%
+             1st Derivative evaluations       0.000 =  0.0%
+ 
+
+
+**** REPORT SUMMARY :        0 INFEASIBLE
+                             0  DEPENDENT
+                             0     ERRORS
+
+
+EXECUTION TIME       =        0.172 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
+
+
+USER: Large MUD - 20 User License                    G211207|0002CA-WIN
+      DREAM, Danish Rational Economic Agents Model                DC620
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\_gams_py_gjo3.gms
+Output     C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\_gams_py_gjo3.lst

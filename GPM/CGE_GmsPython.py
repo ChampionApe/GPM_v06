@@ -1,6 +1,7 @@
 import CGE_globals, GmsPy, pickle, pandas as pd, os
 from Database import GpyDB, gpy
-from DBWheels_mi import MergeDomains, RepeatVar
+from DBWheels_mi import MergeDomains, RepeatVar, mergeMI
+from DBWheels_rc import rc_AdjGpy, rc_pd
 from DBWheels_robust import robust_merge_dbs
 from GmsPy import gmspyStandardOrder
 from _MixTools import OrdSet, NoneInit
@@ -41,7 +42,12 @@ class GmsPython:
 	# --- 		1: Interact w. namespace/database 		--- #
 	def n(self, item, m=None):
 		try:
-			return self.ns[item] if m is None else self.modules[m[0]].n(m[1])
+			if m is None:
+				return self.ns[item]
+			elif type(m) is str:
+				return self.m[m].n(item)
+			else:
+				return self.m[m[0]].n(item,m=m[1])
 		except KeyError:
 			return item
 
@@ -91,11 +97,11 @@ class GmsPython:
 		self.s['args'] = GmsPy.sortedArgs(self.s['args'], order = order)
 		return self.s.write(**NoneInit(write_kwargs,{}))
 
-	def run(self, model=None, db_str = None, exportdb = True, exportTo = None, ws = None, options = None, **kwargs):
+	def run(self, model=None, db_str = None, exportdb = True, exportTo = None, ws = None, options = None, options_add=None, options_run=None,**kwargs):
 		if isinstance(model, GmsPy.GmsModel):
-			return self.runModel(model, db_str=db_str, exportdb=exportdb,exportTo=exportTo)
+			return self.runModel(model, db_str=db_str, exportdb=exportdb,exportTo=exportTo,options_add=options_add, options_run=options_run)
 		else:
-			return self.runAndInitModel(db_str=db_str, exportdb=exportdb,exportTo=exportTo,ws=ws,options=options,**kwargs)
+			return self.runAndInitModel(db_str=db_str, exportdb=exportdb,exportTo=exportTo,ws=ws,options=options,options_add=options_add, options_run=options_run,**kwargs)
 
 	def runAndInitModel(self, db_str=None, exportdb=True, exportTo=None, ws=None, options=None, options_add=None, options_run = None, **kwargs):
 		model = GmsPy.GmsModel(ws=ws,options=options,**kwargs)
@@ -114,7 +120,7 @@ class Submodule:
 
 	def n(self,item,m=None):
 		try:
-			return self.ns[item] if m is None else self.m[m[0]].n(m[1])
+			return self.ns[item] if m is None else self.m[m].n(item)
 		except KeyError:
 			return item
 

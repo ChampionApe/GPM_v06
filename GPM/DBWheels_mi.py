@@ -14,6 +14,17 @@ def MergeDomains(symbols,db,c='std',sort_levels=None):
 	v = sparsedomain(symbols,db=db, c = ('and', symbols) if c == 'std' else c).dropna().index
 	return v if sort_levels is None else v.reorder_levels(sort_levels)
 
+def mergeMI(listOfMI,names=None):
+	if listOfMI:
+		return mergeMultiIndex(listOfMI)
+	elif len(names)==1:
+		return pd.Index([],name=names[0])
+	elif len(names)>1:
+		return pd.MultiIndex.from_tuples([],names=names)
+
+def mergeMultiIndex(listOfMI):
+	return pd.MultiIndex.from_frame(pd.concat([l.to_frame() for l in listOfMI]))
+
 # ShockFunctions:
 def add1dIndex(index,addindex,sort_levels=None):
 	""" If index is None: Return simply the addindex. Else, return the cartesian product of the two. """

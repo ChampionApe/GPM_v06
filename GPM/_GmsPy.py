@@ -108,12 +108,15 @@ class Group:
 		[self.out_neg.__delitem__(k) for k,v in list(self.out_neg.items()) if not v];
 
 	def AddGroup(self,g,groups):
+		[self.AddIte(k,[v]) for k,v in groups[g].conditions.items()];
+
+	def AddGroup_ItemForItem(self,g,groups):
 		[self.AddIte(k,v) for k,v in groups[g].out.items()];
 		[self.AddIteNeg(k,v) for k,v in groups[g].out_neg.items()];
 
 	def AddGroupNeg(self,g,groups):
 		c = groups[g].conditions
-		[self.cond_or_out(groups[g],c,name) for name in groups[g].out];
+		[self.cond_or_out(groups[g],c,name) for name in c];
 
 	def cond_or_out(self,g,c,name):
 		if name in g.out_neg:
