@@ -1,0 +1,4 @@
+Coding, to do:
+	- Create database method to define initial guesses for quantities based on nesting tree (define a branch as corresponding μ * knot). Do this using a groupby statement (holding exogenous variables fixed, e.g. the supply variables), and loop until there is no update in values. 
+	- Create database method to make a dynamic, stationary version of a database that just repeat variables.
+	
