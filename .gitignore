@@ -1,7 +1,6 @@
 __pycache__/
-*.pyc
-.ipynb_checkpoints
-
+work_folder/
 GPM\__pycache__/
 
-work_folder/
+*.pyc
+.ipynb_checkpoints
