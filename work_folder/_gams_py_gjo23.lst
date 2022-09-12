@@ -1,4 +1,4 @@
-GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:20:25 Page 1
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/20/22 15:50:43 Page 1
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -215,7 +215,7 @@ GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_22.gdx
  221   
  222   
  223  solve CES_CET_norm_C using CNS;
-GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:20:25 Page 2
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/20/22 15:50:43 Page 2
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Include File Summary
 
@@ -228,8 +228,8 @@ Include File Summary
      4      136 GDXIN          1     136  C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_22.gdx
 
 
-COMPILATION TIME     =        0.062 SECONDS      3 MB  38.1.0 a1a3b545 WEX-WEI
-GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:20:25 Page 3
+COMPILATION TIME     =        0.000 SECONDS      3 MB  38.1.0 a1a3b545 WEX-WEI
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/20/22 15:50:43 Page 3
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Model Statistics    SOLVE CES_CET_norm_C Using CNS From line 223
 
@@ -243,8 +243,8 @@ CODE LENGTH                  91     CONSTANT POOL              16
 SINGLE =E|X= EQUS             6     SINGLE UNFIXED VARS         6
 
 
-GENERATION TIME      =        0.016 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
-GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:20:25 Page 4
+GENERATION TIME      =        0.000 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/20/22 15:50:43 Page 4
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Solution Report     SOLVE CES_CET_norm_C Using CNS From line 223
 
@@ -292,7 +292,7 @@ Solution Report     SOLVE CES_CET_norm_C Using CNS From line 223
                              0     ERRORS
 
 
-EXECUTION TIME       =        0.219 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
+EXECUTION TIME       =        0.094 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
 
 
 USER: Large MUD - 20 User License                    G211207|0002CA-WIN

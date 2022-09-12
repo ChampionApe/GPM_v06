@@ -1,4 +1,4 @@
-GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:19:56 Page 1
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/20/22 15:50:35 Page 1
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -177,7 +177,7 @@ GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_0.gdx
  183   
  184   
  185  solve CES2_B using CNS;
-GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:19:56 Page 2
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/20/22 15:50:35 Page 2
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Include File Summary
 
@@ -191,7 +191,7 @@ Include File Summary
 
 
 COMPILATION TIME     =        0.016 SECONDS      3 MB  38.1.0 a1a3b545 WEX-WEI
-GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:19:56 Page 3
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/20/22 15:50:35 Page 3
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Model Statistics    SOLVE CES2_B Using CNS From line 185
 
@@ -206,7 +206,7 @@ SINGLE =E|X= EQUS             6     SINGLE UNFIXED VARS         6
 
 
 GENERATION TIME      =        0.000 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
-GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:19:56 Page 4
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/20/22 15:50:35 Page 4
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Solution Report     SOLVE CES2_B Using CNS From line 185
 
@@ -220,7 +220,7 @@ Solution Report     SOLVE CES2_B Using CNS From line 185
 **** SOLVER STATUS     1 Normal Completion
 **** MODEL STATUS      16 Solved
 
- RESOURCE USAGE, LIMIT          0.015 10000000000.000
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
  ITERATION COUNT, LIMIT         1    2147483647
  EVALUATION ERRORS              0             0
  
@@ -242,7 +242,7 @@ Solution Report     SOLVE CES2_B Using CNS From line 185
  ** Feasible solution to a square system.
  
  
- CONOPT time Total                            0.002 seconds
+ CONOPT time Total                            0.000 seconds
    of which: Function evaluations             0.000 =  0.0%
              1st Derivative evaluations       0.000 =  0.0%
  
@@ -253,7 +253,7 @@ Solution Report     SOLVE CES2_B Using CNS From line 185
                              0     ERRORS
 
 
-EXECUTION TIME       =        0.234 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
+EXECUTION TIME       =        0.078 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
 
 
 USER: Large MUD - 20 User License                    G211207|0002CA-WIN

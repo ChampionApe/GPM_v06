@@ -86,7 +86,7 @@ class Group:
 		if len(self.out_neg[name])==1:
 			return ('not', self.out_neg[name][0])
 		else:
-			return ('not', ('or',[self.out_neg[name]]))
+			return ('not', ('or',self.out_neg[name]))
 	def conditions_var(self,name):
 		return ('and', [self.c_var(name), self.c_var_neg(name)]) if name in self.out_neg else self.c_var(name)
 	@property

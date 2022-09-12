@@ -123,9 +123,9 @@ $GDXIN
 $offMulti;
 
 variables
-	mu[s,n,nn]
-	qD[t,s,n]
 	eta[s,n]
+	qD[t,s,n]
+	mu[s,n,nn]
 	sigma[s,n]
 	pS[t,s,n]
 	pD[t,s,n]
@@ -135,9 +135,9 @@ variables
 ;
 $GDXIN %rname_10%
 $onMulti
-$load mu
-$load qD
 $load eta
+$load qD
+$load mu
 $load sigma
 $load pS
 $load pD

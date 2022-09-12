@@ -1,4 +1,4 @@
-GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:20:22 Page 1
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/20/22 15:50:42 Page 1
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -106,8 +106,8 @@ GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_19.gdx
 --- LOAD  qnorm_inp = 36:qnorm_inp
  110   
  111  variables
- 112          mu[s,n,nn]
- 113          eta[s,n]
+ 112          eta[s,n]
+ 113          mu[s,n,nn]
  114          pS[t,s,n]
  115          pD[t,s,n]
  116          qS[t,s,n]
@@ -117,8 +117,8 @@ GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_19.gdx
  120          qiv_inp[t,s,n]
  121  ;
 GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_19.gdx
---- LOAD  mu = 37:mu
---- LOAD  eta = 38:eta
+--- LOAD  eta = 37:eta
+--- LOAD  mu = 38:mu
 --- LOAD  pS = 39:pS
 --- LOAD  pD = 40:pD
 --- LOAD  qS = 41:qS
@@ -179,7 +179,7 @@ GDXIN   C:\Users\sxj477\Documents\GitHub\GPM_v06\work_folder\rname_19.gdx
  185   
  186   
  187  solve CET1_norm_C using CNS;
-GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:20:22 Page 2
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/20/22 15:50:42 Page 2
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Include File Summary
 
@@ -193,7 +193,7 @@ Include File Summary
 
 
 COMPILATION TIME     =        0.015 SECONDS      3 MB  38.1.0 a1a3b545 WEX-WEI
-GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:20:22 Page 3
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/20/22 15:50:42 Page 3
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Model Statistics    SOLVE CET1_norm_C Using CNS From line 187
 
@@ -208,7 +208,7 @@ SINGLE =E|X= EQUS             3     SINGLE UNFIXED VARS         3
 
 
 GENERATION TIME      =        0.000 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
-GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/04/22 15:20:22 Page 4
+GAMS 38.1.0  a1a3b545 Jan 31, 2022          WEX-WEI x86 64bit/MS Windows - 05/20/22 15:50:42 Page 4
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Solution Report     SOLVE CET1_norm_C Using CNS From line 187
 
@@ -222,7 +222,7 @@ Solution Report     SOLVE CET1_norm_C Using CNS From line 187
 **** SOLVER STATUS     1 Normal Completion
 **** MODEL STATUS      16 Solved
 
- RESOURCE USAGE, LIMIT          0.078 10000000000.000
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
  ITERATION COUNT, LIMIT         1    2147483647
  EVALUATION ERRORS              0             0
  
@@ -244,8 +244,8 @@ Solution Report     SOLVE CET1_norm_C Using CNS From line 187
  ** Feasible solution to a square system.
  
  
- CONOPT time Total                            0.002 seconds
-   of which: Function evaluations             0.001 = 50.0%
+ CONOPT time Total                            0.000 seconds
+   of which: Function evaluations             0.000 =  0.0%
              1st Derivative evaluations       0.000 =  0.0%
  
 
@@ -255,7 +255,7 @@ Solution Report     SOLVE CET1_norm_C Using CNS From line 187
                              0     ERRORS
 
 
-EXECUTION TIME       =        0.235 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
+EXECUTION TIME       =        0.063 SECONDS      4 MB  38.1.0 a1a3b545 WEX-WEI
 
 
 USER: Large MUD - 20 User License                    G211207|0002CA-WIN

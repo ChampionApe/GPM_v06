@@ -1,5 +1,5 @@
 from _GmsWrite import *
-from DBWheels_mi import gridDB
+from DBWheels_agg import gridDB
 
 def standardArgs(settings, db, gdx, blocks = None, functions = None, run = True, prefix = '', prefix_run = '', options = None):
 	""" Returns the 'standard' components. Use GmsPy.Groups to handle grouping of variables. """

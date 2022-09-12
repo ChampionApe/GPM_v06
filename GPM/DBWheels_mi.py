@@ -1,9 +1,6 @@
-import pandas as pd, Database, numpy as np
-from Database import gpy
-from _MixTools import NoneInit
+import pandas as pd, numpy as np
 from DBWheels_bc import sparsedomain
-from DBWheels_rc import rc_pd,rc_pdInd
-from DBWheels_agg import update_sets
+from DBWheels_rc import rc_pd
 
 def RepeatVar(x,symbols,db,c='std',sort_levels=None):
 	""" Broadcast domains with conditions c"""
@@ -15,6 +12,7 @@ def MergeDomains(symbols,db,c='std',sort_levels=None):
 	return v if sort_levels is None else v.reorder_levels(sort_levels)
 
 def mergeMI(listOfMI,names=None):
+	""" Merge a list of pd.MultiIndex into one. Uses pd.concat, i.e. assumes consistent index domains. """
 	if listOfMI:
 		return mergeMultiIndex(listOfMI)
 	elif len(names)==1:
@@ -24,6 +22,18 @@ def mergeMI(listOfMI,names=None):
 
 def mergeMultiIndex(listOfMI):
 	return pd.MultiIndex.from_frame(pd.concat([l.to_frame() for l in listOfMI]))
+
+def mergeMult(mi1, mi2):
+	""" Merge mi2 onto mi1. Merge on overlapping levels. Returns an index with the same length as mi1 (drops unused levels)"""
+	o,d1,d2 = [x for x in mi1.names if x in mi2.names], [x for x in mi1.names if x not in mi2.names], [x for x in mi2.names if x not in mi1.names]
+	mi1_, mi2_ = mi1.to_frame().droplevel(d1), mi2.reorder_levels(o+d2).to_frame().droplevel(d2)[d2]
+	return pd.MultiIndex.from_frame(pd.concat([mi1_, rc_pd(mi2_, mi1_)],axis=1))
+
+def applyMult(symbol, mapping):
+	if isinstance(symbol,pd.Index):
+		return (pd.Series(0, index = rc_pd(mapping, symbol)).add(pd.Series(0, index = symbol))).dropna().index.reorder_levels(symbol.names+[k for k in mapping.names if k not in symbol.names])
+	elif isinstance(symbol,pd.Series):
+		return (pd.Series(0, index = rc_pd(mapping, symbol)).add(symbol)).reorder_levels(symbol.index.names+[k for k in mapping.names if k not in symbol.index.names])
 
 # ShockFunctions:
 def add1dIndex(index,addindex,sort_levels=None):
@@ -48,25 +58,3 @@ def addGrid(v0,vT,index,name,gridtype = 'linear', phi = 1,sort_levels=None):
 		return pd.DataFrame(grid(v0,vT,index,gridtype=gridtype,phi=phi).T, index = v0.index, columns = index).stack().rename(name).reorder_levels(index.names+v0.index.names if sort_levels is None else sort_levels)
 	else:
 		return pd.Series(grid(v0,vT,index,gridtype=gridtype,phi=phi), index = index,name=name)
-
-def gridDB(db0, dbT, name, n = 10, extractSol = None, db_name = 'grids', loop = 'l1', gridtype = 'linear', phi = 1, checkDiff = True, error = 1e-11):
-	db = Database.GpyDB(ws = db0.ws, alias = db0.get('alias_'), **{'name': db_name})
-	db[loop] = loop+'_'+pd.Index(range(1,n+1),name=loop).astype(str)
-	for var in set(db0.gettypes('variable').keys()).intersection(set(dbT.gettypes('variable').keys())):
-		commonIndex = db0.get(var).index.intersection(dbT.get(var).index)
-		v0,vT = rc_pd(db0.get(var),commonIndex), rc_pd(dbT.get(var),commonIndex)
-		if checkDiff:
-			commonIndex = vT[abs(v0-vT)>error].index
-			v0,vT = rc_pd(v0,commonIndex),rc_pd(vT,commonIndex)
-		if not vT.empty:
-			db['_'.join([var,name,'ss'])] = commonIndex
-			db['_'.join([var,name])] = gpy(addGrid(v0,vT,db.get(loop),'_'.join([var,name]), gridtype=gridtype, phi=phi), **{'type':'parameter'})
-	for var in set(db0.gettypes(['scalar_variable']).keys()).intersection(set(dbT.gettypes(['scalar_variable']).keys())):
-		if (not checkDiff) or (abs(db0.get(var)-dbT.get(var))>error):
-			db['_'.join([var,name,'ss'])] = db.get(loop)
-			db['_'.join([var,name])] = gpy(addGrid(db0.get(var),dbT.get(var),db.get(loop),'_'.join([var,name]),gridtype=gridtype,phi=phi),**{'type':'parameter'})
-	for var in NoneInit(extractSol,{}):
-		db['_'.join(['sol',var,name])] = gpy(pd.Series(0, index = add1dIndex(rc_pdInd(db0[var],c=extractSol[var]),db.get(loop),sort_levels=db[loop].domains+db0[var].domains), name = '_'.join(['sol',var,name])),**{'type':'parameter'})
-	update_sets(db,clean_alias=True)
-	db.merge_internal()
-	return db
