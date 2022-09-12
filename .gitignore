@@ -1,6 +1,6 @@
 __pycache__/
-*.py[cod]
-*$py.class
+*.pyc
+.ipynb_checkpoints
 
 GPM\__pycache__/
 
